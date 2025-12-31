@@ -36,11 +36,11 @@ make clean           # Remove volumes and cached files
 ```
 config/           # GraphDB repository configuration (dprod-repo-config.ttl)
 ontologies/       # DPROD, DCAT, PROV-O ontology files (.ttl)
+shapes/           # SHACL validation shapes (custom-shapes.ttl)
 data/
   products/       # Data product definitions (.ttl)
   vocab/          # Supporting vocabularies (domains, lifecycle, agents)
 queries/          # Reusable SPARQL queries (.rq)
-scripts/          # Deployment and validation scripts
 tests/
   valid/          # Valid test data for SHACL validation
   invalid/        # Invalid test data (expected to fail)

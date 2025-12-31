@@ -121,6 +121,13 @@ make queries-list
 ```
 ├── config/
 │   └── dprod-repo-config.ttl    # GraphDB repository config (SHACL enabled)
+├── ontologies/                   # Local ontology copies (version controlled)
+│   ├── prov-o.ttl               # W3C PROV-O
+│   ├── dcat.ttl                 # W3C DCAT v3
+│   ├── dprod.ttl                # EKGF DPROD
+│   └── dprod-shapes.ttl         # DPROD SHACL shapes
+├── shapes/                       # Custom SHACL validation shapes
+│   └── custom-shapes.ttl
 ├── data/
 │   ├── products/                 # Data product definitions
 │   │   ├── customer-360.ttl
@@ -132,7 +139,8 @@ make queries-list
 │       ├── domains.ttl
 │       ├── lifecycle-status.ttl
 │       ├── agents.ttl
-│       └── protocols.ttl
+│       ├── protocols.ttl
+│       └── security-types.ttl
 ├── queries/                      # SPARQL query library
 │   ├── list-products.rq
 │   ├── get-product.rq
@@ -160,6 +168,7 @@ make queries-list
 | `urn:vocab:lifecycle` | Lifecycle statuses |
 | `urn:vocab:agents` | Data product owners |
 | `urn:vocab:protocols` | Access protocols |
+| `urn:vocab:security` | Security schema types |
 | `urn:data:products` | Data product instances |
 
 ## Sample Data Products

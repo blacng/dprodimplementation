@@ -67,46 +67,40 @@ create-repo: ## Create the dprod-catalog repository
 		echo "$(GREEN)Repository $(REPOSITORY_ID) created$(NC)"; \
 	fi
 
-load-ontologies: ## Download and load PROV-O, DCAT, and DPROD ontologies
+load-ontologies: ## Load PROV-O, DCAT, and DPROD ontologies from local files
 	@echo "$(GREEN)Loading ontologies...$(NC)"
-	@mkdir -p .cache
 
 	@echo "  Loading PROV-O ontology..."
-	@curl -sfL $(PROV_URL) -o .cache/prov-o.ttl
 	@curl -sf -X POST "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3Curn:ontology:prov%3E" \
 		-H "Content-Type: text/turtle" \
-		--data-binary @.cache/prov-o.ttl
+		--data-binary @ontologies/prov-o.ttl
 	@echo "    $(GREEN)PROV-O loaded to urn:ontology:prov$(NC)"
 
 	@echo "  Loading DCAT ontology..."
-	@curl -sfL $(DCAT_URL) -o .cache/dcat.ttl
 	@curl -sf -X POST "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3Curn:ontology:dcat%3E" \
 		-H "Content-Type: text/turtle" \
-		--data-binary @.cache/dcat.ttl
+		--data-binary @ontologies/dcat.ttl
 	@echo "    $(GREEN)DCAT loaded to urn:ontology:dcat$(NC)"
 
 	@echo "  Loading DPROD ontology..."
-	@curl -sfL $(DPROD_URL) -o .cache/dprod.ttl
 	@curl -sf -X POST "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3Curn:ontology:dprod%3E" \
 		-H "Content-Type: text/turtle" \
-		--data-binary @.cache/dprod.ttl
+		--data-binary @ontologies/dprod.ttl
 	@echo "    $(GREEN)DPROD loaded to urn:ontology:dprod$(NC)"
 
 load-shapes: ## Load DPROD SHACL validation shapes
 	@echo "$(GREEN)Loading SHACL shapes...$(NC)"
-	@mkdir -p .cache
 
 	@echo "  Loading DPROD shapes..."
-	@curl -sfL $(DPROD_SHAPES_URL) -o .cache/dprod-shapes.ttl
 	@curl -sf -X POST "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3Chttp://rdf4j.org/schema/rdf4j%23SHACLShapeGraph%3E" \
 		-H "Content-Type: text/turtle" \
-		--data-binary @.cache/dprod-shapes.ttl
+		--data-binary @ontologies/dprod-shapes.ttl
 	@echo "    $(GREEN)DPROD shapes loaded$(NC)"
 
 	@echo "  Loading custom validation shapes..."
 	@curl -sf -X POST "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3Chttp://rdf4j.org/schema/rdf4j%23SHACLShapeGraph%3E" \
 		-H "Content-Type: text/turtle" \
-		--data-binary @config/custom-shapes.ttl
+		--data-binary @shapes/custom-shapes.ttl
 	@echo "    $(GREEN)Custom shapes loaded$(NC)"
 
 	@echo "$(GREEN)All SHACL shapes loaded$(NC)"
@@ -194,6 +188,12 @@ load-vocab: ## Load supporting vocabularies (domains, agents, protocols, lifecyc
 		-H "Content-Type: text/turtle" \
 		--data-binary @data/vocab/protocols.ttl
 	@echo "    $(GREEN)Protocols loaded$(NC)"
+
+	@echo "  Loading security types..."
+	@curl -sf -X POST "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3Curn:vocab:security%3E" \
+		-H "Content-Type: text/turtle" \
+		--data-binary @data/vocab/security-types.ttl
+	@echo "    $(GREEN)Security types loaded$(NC)"
 
 	@echo "$(GREEN)All vocabularies loaded$(NC)"
 
