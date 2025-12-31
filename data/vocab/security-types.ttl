@@ -1,0 +1,46 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@base <https://data.vcondition.com/> .
+
+# Security Schema Types
+# Used with dprod:securitySchemaType for Data Service authentication
+
+<security/oauth2> a skos:Concept ;
+    rdfs:label "OAuth 2.0" ;
+    skos:prefLabel "OAuth 2.0" ;
+    skos:definition "OAuth 2.0 authorization framework for delegated access" .
+
+<security/api-key> a skos:Concept ;
+    rdfs:label "API Key" ;
+    skos:prefLabel "API Key" ;
+    skos:definition "API key-based authentication via header or query parameter" .
+
+<security/jwt> a skos:Concept ;
+    rdfs:label "JWT" ;
+    skos:prefLabel "JWT" ;
+    skos:definition "JSON Web Token for stateless authentication" .
+
+<security/basic-auth> a skos:Concept ;
+    rdfs:label "Basic Auth" ;
+    skos:prefLabel "Basic Auth" ;
+    skos:definition "HTTP Basic Authentication with username and password" .
+
+<security/mtls> a skos:Concept ;
+    rdfs:label "Mutual TLS" ;
+    skos:prefLabel "Mutual TLS" ;
+    skos:definition "Mutual TLS with client certificate verification" .
+
+<security/saml> a skos:Concept ;
+    rdfs:label "SAML" ;
+    skos:prefLabel "SAML" ;
+    skos:definition "Security Assertion Markup Language for SSO integration" .
+
+<security/oidc> a skos:Concept ;
+    rdfs:label "OpenID Connect" ;
+    skos:prefLabel "OpenID Connect" ;
+    skos:definition "OpenID Connect identity layer on top of OAuth 2.0" .
+
+<security/none> a skos:Concept ;
+    rdfs:label "No Authentication" ;
+    skos:prefLabel "No Authentication" ;
+    skos:definition "Public endpoint with no authentication required" .
