@@ -1,0 +1,27 @@
+# Find data products not modified recently
+# Parameter: $DAYS_THRESHOLD - number of days to consider stale (default behavior: no date)
+#
+# Note: This query finds products without a recent dct:modified date
+# In practice, you may need to adjust based on your update frequency
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?product ?label ?status ?modified ?owner
+WHERE {
+  ?product a dprod:DataProduct ;
+           rdfs:label ?label ;
+           dprod:lifecycleStatus ?status .
+
+  OPTIONAL { ?product dct:modified ?modified }
+  OPTIONAL { ?product dprod:dataProductOwner ?owner }
+
+  # Find products with no modification date OR old modification date
+  FILTER (
+    !BOUND(?modified) ||
+    ?modified < (NOW() - "P90D"^^xsd:duration)
+  )
+}
+ORDER BY ?modified ?label

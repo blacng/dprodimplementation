@@ -1,0 +1,25 @@
+# Trace downstream dependencies (consumers) for a data product
+# Parameter: $PRODUCT_URI - the full URI of the data product
+#
+# Example usage:
+#   Replace $PRODUCT_URI with <https://data.vcondition.com/products/customer-360>
+#
+# Returns products that consume data from this product
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?downstream ?downstreamLabel ?downstreamStatus ?viaPort ?portLabel
+WHERE {
+  BIND($PRODUCT_URI AS ?product)
+
+  ?product dprod:outputPort ?viaPort .
+
+  ?downstream a dprod:DataProduct ;
+              rdfs:label ?downstreamLabel ;
+              dprod:inputPort ?viaPort ;
+              dprod:lifecycleStatus ?downstreamStatus .
+
+  OPTIONAL { ?viaPort rdfs:label ?portLabel }
+}
+ORDER BY ?downstreamLabel

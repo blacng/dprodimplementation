@@ -1,7 +1,7 @@
 # DPROD GraphDB Makefile
 # Usage: make [target]
 
-.PHONY: help up down logs create-repo load-ontologies load-shapes load-vocab load-products setup setup-full health clean shell wait
+.PHONY: help up down logs create-repo load-ontologies load-shapes load-vocab load-products setup setup-full health clean shell wait query queries-list
 
 # Load environment variables
 -include .env
@@ -234,3 +234,48 @@ list-products: ## List all data products in the catalog
 	@curl -sf "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)" \
 		--data-urlencode "query=PREFIX dprod: <https://ekgf.github.io/dprod/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX dct: <http://purl.org/dc/terms/> SELECT ?product ?label ?status WHERE { ?product a dprod:DataProduct ; rdfs:label ?label ; dprod:lifecycleStatus ?status . } ORDER BY ?label" \
 		-H "Accept: text/csv"
+
+# Query execution
+# Usage: make query FILE=queries/list-products.rq [FORMAT=csv|json|xml]
+query: ## Run a SPARQL query from file (FILE=path FORMAT=csv|json|xml)
+	@if [ -z "$(FILE)" ]; then \
+		echo "$(RED)Error: FILE parameter required$(NC)"; \
+		echo "Usage: make query FILE=queries/list-products.rq [FORMAT=csv]"; \
+		echo ""; \
+		echo "Available queries:"; \
+		ls -1 queries/*.rq 2>/dev/null | sed 's/^/  /'; \
+		exit 1; \
+	fi
+	@if [ ! -f "$(FILE)" ]; then \
+		echo "$(RED)Error: File $(FILE) not found$(NC)"; \
+		exit 1; \
+	fi
+	@FORMAT=$${FORMAT:-csv}; \
+	case $$FORMAT in \
+		csv)  ACCEPT="text/csv" ;; \
+		json) ACCEPT="application/sparql-results+json" ;; \
+		xml)  ACCEPT="application/sparql-results+xml" ;; \
+		*)    echo "$(RED)Unknown format: $$FORMAT$(NC)"; exit 1 ;; \
+	esac; \
+	echo "$(GREEN)Running query: $(FILE) (format: $$FORMAT)$(NC)"; \
+	echo ""; \
+	curl -sf "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)" \
+		--data-urlencode "query@$(FILE)" \
+		-H "Accept: $$ACCEPT"
+
+queries-list: ## List available SPARQL queries
+	@echo "$(GREEN)Available SPARQL Queries:$(NC)"
+	@echo ""
+	@echo "Core Queries:"
+	@ls -1 queries/*.rq 2>/dev/null | grep -E '(list|get|find|search)' | sed 's/^/  /'
+	@echo ""
+	@echo "Lineage Queries:"
+	@ls -1 queries/*.rq 2>/dev/null | grep 'lineage' | sed 's/^/  /'
+	@echo ""
+	@echo "Analytics Queries:"
+	@ls -1 queries/*.rq 2>/dev/null | grep -E '(stats|recent)' | sed 's/^/  /'
+	@echo ""
+	@echo "Admin Queries:"
+	@ls -1 queries/*.rq 2>/dev/null | grep -E '(orphan|missing|stale|without)' | sed 's/^/  /'
+	@echo ""
+	@echo "Usage: make query FILE=queries/<name>.rq [FORMAT=csv|json|xml]"

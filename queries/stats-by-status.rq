@@ -1,0 +1,15 @@
+# Count data products by lifecycle status
+# Returns aggregated statistics for each status
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?status ?statusLabel (COUNT(?product) AS ?productCount)
+WHERE {
+  ?product a dprod:DataProduct ;
+           dprod:lifecycleStatus ?status .
+
+  OPTIONAL { ?status rdfs:label ?statusLabel }
+}
+GROUP BY ?status ?statusLabel
+ORDER BY DESC(?productCount)

@@ -1,0 +1,20 @@
+# Find data products without an owner
+# Admin query to identify products needing ownership assignment
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?product ?label ?status ?domain
+WHERE {
+  ?product a dprod:DataProduct ;
+           rdfs:label ?label ;
+           dprod:lifecycleStatus ?status .
+
+  OPTIONAL { ?product dprod:domain ?domain }
+
+  # Find products without an owner
+  FILTER NOT EXISTS {
+    ?product dprod:dataProductOwner ?owner .
+  }
+}
+ORDER BY ?label

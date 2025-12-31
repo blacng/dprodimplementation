@@ -1,0 +1,22 @@
+# Find data products without any input or output ports
+# Admin query to identify incomplete product definitions
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?product ?label ?status ?hasInput ?hasOutput
+WHERE {
+  ?product a dprod:DataProduct ;
+           rdfs:label ?label ;
+           dprod:lifecycleStatus ?status .
+
+  # Check for input ports
+  BIND(EXISTS { ?product dprod:inputPort ?in } AS ?hasInput)
+
+  # Check for output ports
+  BIND(EXISTS { ?product dprod:outputPort ?out } AS ?hasOutput)
+
+  # Filter to products missing at least one type of port
+  FILTER (!?hasInput || !?hasOutput)
+}
+ORDER BY ?label

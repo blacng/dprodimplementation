@@ -1,0 +1,25 @@
+# Find data products by lifecycle status
+# Parameter: $STATUS_URI - the full URI of the lifecycle status
+#
+# Example usage:
+#   Replace $STATUS_URI with <https://ekgf.github.io/dprod/data/lifecycle-status/Consume>
+#
+# Valid statuses:
+#   - Ideation, Design, Build, Deploy, Consume, Retire
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?product ?label ?description ?domain ?domainLabel ?owner ?ownerLabel
+WHERE {
+  ?product a dprod:DataProduct ;
+           rdfs:label ?label ;
+           dprod:lifecycleStatus $STATUS_URI ;
+           dprod:dataProductOwner ?owner .
+
+  OPTIONAL { ?product dct:description ?description }
+  OPTIONAL { ?product dprod:domain ?domain . ?domain rdfs:label ?domainLabel }
+  OPTIONAL { ?owner rdfs:label ?ownerLabel }
+}
+ORDER BY ?label

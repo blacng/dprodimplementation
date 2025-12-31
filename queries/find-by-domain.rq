@@ -1,0 +1,22 @@
+# Find data products by business domain
+# Parameter: $DOMAIN_URI - the full URI of the domain
+#
+# Example usage:
+#   Replace $DOMAIN_URI with <https://data.vcondition.com/domains/customer-analytics>
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?product ?label ?description ?status ?owner ?ownerLabel
+WHERE {
+  ?product a dprod:DataProduct ;
+           rdfs:label ?label ;
+           dprod:domain $DOMAIN_URI ;
+           dprod:lifecycleStatus ?status ;
+           dprod:dataProductOwner ?owner .
+
+  OPTIONAL { ?product dct:description ?description }
+  OPTIONAL { ?owner rdfs:label ?ownerLabel }
+}
+ORDER BY ?label

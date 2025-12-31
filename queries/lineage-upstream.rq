@@ -1,0 +1,25 @@
+# Trace upstream dependencies (data sources) for a data product
+# Parameter: $PRODUCT_URI - the full URI of the data product
+#
+# Example usage:
+#   Replace $PRODUCT_URI with <https://data.vcondition.com/products/sales-analytics>
+#
+# Returns products that this product consumes data from
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?upstream ?upstreamLabel ?upstreamStatus ?viaPort ?portLabel
+WHERE {
+  BIND($PRODUCT_URI AS ?product)
+
+  ?product dprod:inputPort ?viaPort .
+
+  ?upstream a dprod:DataProduct ;
+            rdfs:label ?upstreamLabel ;
+            dprod:outputPort ?viaPort ;
+            dprod:lifecycleStatus ?upstreamStatus .
+
+  OPTIONAL { ?viaPort rdfs:label ?portLabel }
+}
+ORDER BY ?upstreamLabel

@@ -1,0 +1,44 @@
+# Get detailed information about a specific data product
+# Parameter: $PRODUCT_URI - the full URI of the data product
+#
+# Example usage:
+#   Replace $PRODUCT_URI with <https://data.vcondition.com/products/customer-360>
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+  ?product ?p ?o .
+  ?outputPort ?op ?ov .
+  ?inputPort ?ip ?iv .
+  ?dataset ?dp ?dv .
+  ?distribution ?distp ?distv .
+}
+WHERE {
+  BIND($PRODUCT_URI AS ?product)
+
+  ?product a dprod:DataProduct ;
+           ?p ?o .
+
+  OPTIONAL {
+    ?product dprod:outputPort ?outputPort .
+    ?outputPort ?op ?ov .
+  }
+
+  OPTIONAL {
+    ?product dprod:inputPort ?inputPort .
+    ?inputPort ?ip ?iv .
+  }
+
+  OPTIONAL {
+    ?outputPort dcat:servesDataset ?dataset .
+    ?dataset ?dp ?dv .
+  }
+
+  OPTIONAL {
+    ?dataset dcat:distribution ?distribution .
+    ?distribution ?distp ?distv .
+  }
+}

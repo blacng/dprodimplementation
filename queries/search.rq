@@ -1,0 +1,45 @@
+# Full-text search for data products
+# Parameter: $SEARCH_TERM - the search term (case-insensitive)
+#
+# Example usage:
+#   Replace $SEARCH_TERM with "customer"
+#
+# Searches in: label, title, description, purpose
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT ?product ?label ?description ?status ?matchedField
+WHERE {
+  ?product a dprod:DataProduct ;
+           rdfs:label ?label ;
+           dprod:lifecycleStatus ?status .
+
+  OPTIONAL { ?product dct:description ?description }
+
+  {
+    ?product rdfs:label ?matchValue .
+    FILTER(CONTAINS(LCASE(?matchValue), LCASE($SEARCH_TERM)))
+    BIND("label" AS ?matchedField)
+  }
+  UNION
+  {
+    ?product dct:title ?matchValue .
+    FILTER(CONTAINS(LCASE(?matchValue), LCASE($SEARCH_TERM)))
+    BIND("title" AS ?matchedField)
+  }
+  UNION
+  {
+    ?product dct:description ?matchValue .
+    FILTER(CONTAINS(LCASE(?matchValue), LCASE($SEARCH_TERM)))
+    BIND("description" AS ?matchedField)
+  }
+  UNION
+  {
+    ?product dprod:purpose ?matchValue .
+    FILTER(CONTAINS(LCASE(?matchValue), LCASE($SEARCH_TERM)))
+    BIND("purpose" AS ?matchedField)
+  }
+}
+ORDER BY ?label

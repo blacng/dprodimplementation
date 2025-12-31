@@ -41,6 +41,13 @@ open http://localhost:7200
 | `make load-products` | Load sample data products |
 | `make list-products` | List all data products in catalog |
 
+### Query Execution
+
+| Target | Description |
+|--------|-------------|
+| `make query FILE=<path>` | Run a SPARQL query from file |
+| `make queries-list` | List all available queries |
+
 ### Utilities
 
 | Target | Description |
@@ -48,6 +55,57 @@ open http://localhost:7200
 | `make logs` | View container logs |
 | `make shell` | Open shell in container |
 | `make help` | Show all available targets |
+
+## Query Library
+
+The `queries/` directory contains ready-to-use SPARQL queries:
+
+### Core Queries
+| Query | Description |
+|-------|-------------|
+| `list-products.rq` | List all data products with details |
+| `get-product.rq` | Get complete details for a single product |
+| `find-by-domain.rq` | Find products by business domain |
+| `find-by-status.rq` | Find products by lifecycle status |
+| `find-by-owner.rq` | Find products by owner/team |
+| `search.rq` | Full-text search across product metadata |
+
+### Lineage Queries
+| Query | Description |
+|-------|-------------|
+| `lineage-full.rq` | Complete dependency graph |
+| `lineage-upstream.rq` | Trace data sources for a product |
+| `lineage-downstream.rq` | Trace consumers of a product |
+
+### Analytics Queries
+| Query | Description |
+|-------|-------------|
+| `stats-by-domain.rq` | Product count by domain |
+| `stats-by-status.rq` | Product count by lifecycle status |
+| `stats-by-owner.rq` | Product count by owner |
+| `recent-changes.rq` | Recently modified products |
+
+### Admin Queries
+| Query | Description |
+|-------|-------------|
+| `orphaned-datasets.rq` | Datasets not linked to any product |
+| `missing-owners.rq` | Products without an owner |
+| `missing-descriptions.rq` | Products without descriptions |
+| `products-without-ports.rq` | Products missing input/output ports |
+| `stale-products.rq` | Products not recently modified |
+
+### Running Queries
+
+```bash
+# Run a query (CSV output by default)
+make query FILE=queries/list-products.rq
+
+# Get JSON output
+make query FILE=queries/stats-by-domain.rq FORMAT=json
+
+# List all available queries
+make queries-list
+```
 
 ## Project Structure
 
@@ -66,6 +124,13 @@ open http://localhost:7200
 │       ├── lifecycle-status.ttl
 │       ├── agents.ttl
 │       └── protocols.ttl
+├── queries/                      # SPARQL query library
+│   ├── list-products.rq
+│   ├── get-product.rq
+│   ├── find-by-*.rq             # Discovery queries
+│   ├── lineage-*.rq             # Lineage queries
+│   ├── stats-by-*.rq            # Analytics queries
+│   └── *.rq                     # Admin queries
 ├── docker-compose.yml
 ├── Makefile
 └── .env.example

@@ -1,0 +1,18 @@
+# Count data products by owner/team
+# Returns aggregated statistics for each owner
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?owner ?ownerName (COUNT(?product) AS ?productCount)
+WHERE {
+  ?product a dprod:DataProduct ;
+           dprod:dataProductOwner ?owner .
+
+  OPTIONAL { ?owner foaf:name ?ownerName }
+  OPTIONAL { ?owner rdfs:label ?ownerLabel }
+  BIND(COALESCE(?ownerName, ?ownerLabel) AS ?ownerName)
+}
+GROUP BY ?owner ?ownerName
+ORDER BY DESC(?productCount)
