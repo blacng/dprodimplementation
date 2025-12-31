@@ -1,0 +1,21 @@
+# Invalid: Data product missing required owner
+# Expected: SHACL validation FAILS - dprod:dataProductOwner is required
+
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+@base <https://data.vcondition.com/> .
+
+# INVALID: Missing dprod:dataProductOwner
+<test/invalid/missing-owner> a dprod:DataProduct ;
+    rdfs:label "Product Without Owner" ;
+    dct:description "This product is missing the required owner property" ;
+    # dprod:dataProductOwner is MISSING - should fail validation
+    dprod:lifecycleStatus <https://ekgf.github.io/dprod/data/lifecycle-status/Build> ;
+    dprod:outputPort <test/ports/orphan-output> .
+
+<test/ports/orphan-output> a dprod:OutputPort ;
+    rdfs:label "Orphan Output Port" .

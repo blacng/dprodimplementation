@@ -1,0 +1,147 @@
+# Custom SHACL shapes extending DPROD with stricter validation rules
+# These shapes enforce required properties for data governance
+
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+@base <https://data.vcondition.com/shapes/> .
+
+# =============================================================================
+# Data Product Shape - Required Properties
+# =============================================================================
+
+<DataProductShape> a sh:NodeShape ;
+    sh:targetClass dprod:DataProduct ;
+    sh:name "Data Product Validation" ;
+    sh:description "Validates that data products have required properties" ;
+
+    # Required: rdfs:label
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:name "label" ;
+        sh:message "Data product must have exactly one rdfs:label" ;
+        sh:severity sh:Violation ;
+    ] ;
+
+    # Required: dct:description
+    sh:property [
+        sh:path dct:description ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:name "description" ;
+        sh:message "Data product must have at least one dct:description" ;
+        sh:severity sh:Violation ;
+    ] ;
+
+    # Required: dprod:dataProductOwner (must be IRI)
+    sh:property [
+        sh:path dprod:dataProductOwner ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:name "owner" ;
+        sh:message "Data product must have at least one owner (as IRI reference)" ;
+        sh:severity sh:Violation ;
+    ] ;
+
+    # Required: dprod:lifecycleStatus (must be IRI)
+    sh:property [
+        sh:path dprod:lifecycleStatus ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:name "lifecycle status" ;
+        sh:message "Data product must have exactly one lifecycle status (as IRI reference)" ;
+        sh:severity sh:Violation ;
+    ] ;
+
+    # Required: dprod:outputPort (must be IRI)
+    sh:property [
+        sh:path dprod:outputPort ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:name "output port" ;
+        sh:message "Data product must have at least one output port (as IRI reference)" ;
+        sh:severity sh:Violation ;
+    ] ;
+
+    # Optional but validated: dct:created (must be date if present)
+    sh:property [
+        sh:path dct:created ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:name "created date" ;
+        sh:message "dct:created must be a valid xsd:date" ;
+        sh:severity sh:Violation ;
+    ] ;
+
+    # Optional but validated: dct:modified (must be date if present)
+    sh:property [
+        sh:path dct:modified ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:name "modified date" ;
+        sh:message "dct:modified must be a valid xsd:date" ;
+        sh:severity sh:Violation ;
+    ] ;
+
+    # Optional: dprod:inputPort (must be IRI if present)
+    sh:property [
+        sh:path dprod:inputPort ;
+        sh:nodeKind sh:IRI ;
+        sh:name "input port" ;
+        sh:message "dprod:inputPort must be an IRI reference" ;
+        sh:severity sh:Violation ;
+    ] ;
+
+    # Optional: dprod:domain (must be IRI if present)
+    sh:property [
+        sh:path dprod:domain ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:name "domain" ;
+        sh:message "dprod:domain must be an IRI reference" ;
+        sh:severity sh:Violation ;
+    ] .
+
+# =============================================================================
+# Output Port Shape
+# =============================================================================
+
+<OutputPortShape> a sh:NodeShape ;
+    sh:targetClass dprod:OutputPort ;
+    sh:name "Output Port Validation" ;
+
+    # Required: rdfs:label
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:name "label" ;
+        sh:message "Output port must have at least one rdfs:label" ;
+        sh:severity sh:Violation ;
+    ] .
+
+# =============================================================================
+# Input Port Shape
+# =============================================================================
+
+<InputPortShape> a sh:NodeShape ;
+    sh:targetClass dprod:InputPort ;
+    sh:name "Input Port Validation" ;
+
+    # Required: rdfs:label
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:name "label" ;
+        sh:message "Input port must have at least one rdfs:label" ;
+        sh:severity sh:Violation ;
+    ] .

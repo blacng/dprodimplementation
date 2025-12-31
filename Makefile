@@ -1,7 +1,7 @@
 # DPROD GraphDB Makefile
 # Usage: make [target]
 
-.PHONY: help up down logs create-repo load-ontologies load-shapes load-vocab load-products setup setup-full health clean shell wait query queries-list
+.PHONY: help up down logs create-repo load-ontologies load-shapes load-vocab load-products setup setup-full health clean shell wait query queries-list test test-valid test-invalid test-validate-file
 
 # Load environment variables
 -include .env
@@ -96,11 +96,20 @@ load-shapes: ## Load DPROD SHACL validation shapes
 	@echo "$(GREEN)Loading SHACL shapes...$(NC)"
 	@mkdir -p .cache
 
+	@echo "  Loading DPROD shapes..."
 	@curl -sfL $(DPROD_SHAPES_URL) -o .cache/dprod-shapes.ttl
 	@curl -sf -X POST "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3Chttp://rdf4j.org/schema/rdf4j%23SHACLShapeGraph%3E" \
 		-H "Content-Type: text/turtle" \
 		--data-binary @.cache/dprod-shapes.ttl
-	@echo "$(GREEN)SHACL shapes loaded$(NC)"
+	@echo "    $(GREEN)DPROD shapes loaded$(NC)"
+
+	@echo "  Loading custom validation shapes..."
+	@curl -sf -X POST "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3Chttp://rdf4j.org/schema/rdf4j%23SHACLShapeGraph%3E" \
+		-H "Content-Type: text/turtle" \
+		--data-binary @config/custom-shapes.ttl
+	@echo "    $(GREEN)Custom shapes loaded$(NC)"
+
+	@echo "$(GREEN)All SHACL shapes loaded$(NC)"
 
 setup: up wait create-repo load-ontologies load-shapes health ## Full setup: start, create repo, load ontologies and shapes
 	@echo ""
@@ -279,3 +288,95 @@ queries-list: ## List available SPARQL queries
 	@ls -1 queries/*.rq 2>/dev/null | grep -E '(orphan|missing|stale|without)' | sed 's/^/  /'
 	@echo ""
 	@echo "Usage: make query FILE=queries/<name>.rq [FORMAT=csv|json|xml]"
+
+# Validation Tests using SPARQL-based validation
+TEST_GRAPH = urn:test:validation
+
+test: test-valid test-invalid ## Run all validation tests
+	@echo ""
+	@echo "$(GREEN)============================================$(NC)"
+	@echo "$(GREEN)All validation tests completed!$(NC)"
+	@echo "$(GREEN)============================================$(NC)"
+
+test-valid: ## Test that valid examples pass validation
+	@echo "$(GREEN)Testing valid data products...$(NC)"
+	@echo ""
+	@PASSED=0; FAILED=0; \
+	for file in tests/valid/*.ttl; do \
+		name=$$(basename "$$file" .ttl); \
+		echo -n "  $$name: "; \
+		curl -sf -X DELETE "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3C$(TEST_GRAPH)%3E" > /dev/null 2>&1 || true; \
+		if curl -sf -X POST "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3C$(TEST_GRAPH)%3E" \
+			-H "Content-Type: text/turtle" \
+			--data-binary @"$$file" > /dev/null 2>&1; then \
+			VIOLATIONS=$$(curl -sf "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)" \
+				--data-urlencode "query@queries/validate-count.rq" \
+				-H "Accept: application/sparql-results+json" 2>/dev/null | grep -oE '"value" *: *"[0-9]+"' | grep -oE '[0-9]+' || echo "0"); \
+			if [ "$$VIOLATIONS" = "0" ] || [ -z "$$VIOLATIONS" ]; then \
+				echo "$(GREEN)PASS$(NC) (valid, no violations)"; \
+				PASSED=$$((PASSED + 1)); \
+			else \
+				echo "$(RED)FAIL$(NC) (expected valid, got $$VIOLATIONS violations)"; \
+				FAILED=$$((FAILED + 1)); \
+			fi; \
+		else \
+			echo "$(RED)FAIL$(NC) (syntax error)"; \
+			FAILED=$$((FAILED + 1)); \
+		fi; \
+	done; \
+	curl -sf -X DELETE "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3C$(TEST_GRAPH)%3E" > /dev/null 2>&1 || true; \
+	echo ""; \
+	echo "Valid tests: $$PASSED passed, $$FAILED failed"; \
+	if [ $$FAILED -gt 0 ]; then exit 1; fi
+
+test-invalid: ## Test that invalid examples fail validation
+	@echo "$(GREEN)Testing invalid data products...$(NC)"
+	@echo ""
+	@PASSED=0; FAILED=0; \
+	for file in tests/invalid/*.ttl; do \
+		name=$$(basename "$$file" .ttl); \
+		echo -n "  $$name: "; \
+		curl -sf -X DELETE "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3C$(TEST_GRAPH)%3E" > /dev/null 2>&1 || true; \
+		if curl -sf -X POST "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3C$(TEST_GRAPH)%3E" \
+			-H "Content-Type: text/turtle" \
+			--data-binary @"$$file" > /dev/null 2>&1; then \
+			VIOLATIONS=$$(curl -sf "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)" \
+				--data-urlencode "query@queries/validate-count.rq" \
+				-H "Accept: application/sparql-results+json" 2>/dev/null | grep -oE '"value" *: *"[0-9]+"' | grep -oE '[0-9]+' || echo "0"); \
+			if [ "$$VIOLATIONS" != "0" ] && [ -n "$$VIOLATIONS" ]; then \
+				echo "$(GREEN)PASS$(NC) (correctly detected $$VIOLATIONS violations)"; \
+				PASSED=$$((PASSED + 1)); \
+			else \
+				echo "$(RED)FAIL$(NC) (expected violations, got none)"; \
+				FAILED=$$((FAILED + 1)); \
+			fi; \
+		else \
+			echo "$(GREEN)PASS$(NC) (rejected at parse time)"; \
+			PASSED=$$((PASSED + 1)); \
+		fi; \
+	done; \
+	curl -sf -X DELETE "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3C$(TEST_GRAPH)%3E" > /dev/null 2>&1 || true; \
+	echo ""; \
+	echo "Invalid tests: $$PASSED passed, $$FAILED failed"; \
+	if [ $$FAILED -gt 0 ]; then exit 1; fi
+
+test-validate-file: ## Validate a single TTL file (FILE=path/to/file.ttl)
+	@if [ -z "$(FILE)" ]; then \
+		echo "$(RED)Error: FILE parameter required$(NC)"; \
+		echo "Usage: make test-validate-file FILE=path/to/file.ttl"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)Validating: $(FILE)$(NC)"
+	@curl -sf -X DELETE "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3C$(TEST_GRAPH)%3E" > /dev/null 2>&1 || true
+	@if curl -sf -X POST "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3C$(TEST_GRAPH)%3E" \
+		-H "Content-Type: text/turtle" \
+		--data-binary @"$(FILE)" > /dev/null 2>&1; then \
+		echo "$(GREEN)File loaded. Checking constraints...$(NC)"; \
+		echo ""; \
+		curl -sf "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)" \
+			--data-urlencode "query@queries/validate-product.rq" \
+			-H "Accept: text/csv" | grep -v "^product,violation,message$$" || echo "No violations found"; \
+	else \
+		echo "$(RED)Failed to load file (syntax error)$(NC)"; \
+	fi
+	@curl -sf -X DELETE "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3C$(TEST_GRAPH)%3E" > /dev/null 2>&1 || true

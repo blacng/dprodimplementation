@@ -1,0 +1,23 @@
+# Invalid: Data product with wrong type for output port (literal instead of URI)
+# Expected: SHACL validation FAILS - dprod:outputPort should be a resource
+
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+@base <https://data.vcondition.com/> .
+
+# INVALID: Output port is a literal string instead of a URI reference
+<test/invalid/wrong-type-port> a dprod:DataProduct ;
+    rdfs:label "Product With Literal Port" ;
+    dct:description "This product has an output port specified as a string literal" ;
+    dprod:dataProductOwner <test/agents/port-type-owner> ;
+    dprod:lifecycleStatus <https://ekgf.github.io/dprod/data/lifecycle-status/Build> ;
+    # INVALID: Should be a URI, not a literal
+    dprod:outputPort "REST API endpoint" .
+
+<test/agents/port-type-owner> a foaf:Agent ;
+    foaf:name "Port Type Test Owner" .

@@ -1,0 +1,56 @@
+# Complete valid data product - contains all common properties
+# Expected: SHACL validation PASSES
+
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+@base <https://data.vcondition.com/> .
+
+# Complete data product with all properties
+<test/valid/complete-product> a dprod:DataProduct ;
+    # Required properties
+    rdfs:label "Complete Test Product" ;
+    dct:description "A complete data product demonstrating all common properties" ;
+    dprod:dataProductOwner <test/agents/complete-owner> ;
+    dprod:lifecycleStatus <https://ekgf.github.io/dprod/data/lifecycle-status/Consume> ;
+    dprod:outputPort <test/ports/complete-api> ;
+
+    # Optional properties
+    dct:title "Complete Test Data Product" ;
+    dprod:domain <test/domains/test-domain> ;
+    dprod:purpose "Demonstrate a fully-specified data product for testing" ;
+    dprod:inputPort <test/ports/complete-input> ;
+    dct:created "2024-01-01"^^xsd:date ;
+    dct:modified "2024-12-01"^^xsd:date ;
+    dcat:keyword "test", "validation", "complete" ;
+    dct:conformsTo <https://ekgf.github.io/dprod/> .
+
+# Owner agent
+<test/agents/complete-owner> a foaf:Agent ;
+    foaf:name "Complete Test Team" ;
+    foaf:mbox <mailto:test-team@example.com> .
+
+# Domain
+<test/domains/test-domain> a skos:Concept ;
+    rdfs:label "Test Domain" ;
+    skos:prefLabel "Test Domain" .
+
+# Output port with dataset
+<test/ports/complete-api> a dprod:OutputPort ;
+    rdfs:label "Complete API Output" ;
+    dprod:protocol <protocols/rest> ;
+    dprod:datasetSource <test/datasets/complete-dataset> .
+
+# Input port
+<test/ports/complete-input> a dprod:InputPort ;
+    rdfs:label "Complete Input Port" .
+
+# Dataset
+<test/datasets/complete-dataset> a dcat:Dataset ;
+    rdfs:label "Complete Test Dataset" ;
+    dct:description "Test dataset for complete product" .

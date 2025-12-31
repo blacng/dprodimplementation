@@ -48,6 +48,15 @@ open http://localhost:7200
 | `make query FILE=<path>` | Run a SPARQL query from file |
 | `make queries-list` | List all available queries |
 
+### Validation Tests
+
+| Target | Description |
+|--------|-------------|
+| `make test` | Run all validation tests |
+| `make test-valid` | Test valid examples pass validation |
+| `make test-invalid` | Test invalid examples fail validation |
+| `make test-validate-file FILE=<path>` | Validate a single TTL file |
+
 ### Utilities
 
 | Target | Description |
@@ -130,7 +139,11 @@ make queries-list
 │   ├── find-by-*.rq             # Discovery queries
 │   ├── lineage-*.rq             # Lineage queries
 │   ├── stats-by-*.rq            # Analytics queries
+│   ├── validate-*.rq            # Validation queries
 │   └── *.rq                     # Admin queries
+├── tests/                        # Validation test suite
+│   ├── valid/                   # Valid examples (should pass)
+│   └── invalid/                 # Invalid examples (should fail)
 ├── docker-compose.yml
 ├── Makefile
 └── .env.example
