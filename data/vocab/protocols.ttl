@@ -1,0 +1,35 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@base <https://data.vcondition.com/> .
+
+# Data Access Protocols
+
+<protocols/rest> a skos:Concept ;
+    rdfs:label "REST API" ;
+    skos:prefLabel "REST API" ;
+    skos:definition "RESTful HTTP API for data access" .
+
+<protocols/graphql> a skos:Concept ;
+    rdfs:label "GraphQL" ;
+    skos:prefLabel "GraphQL" ;
+    skos:definition "GraphQL API for flexible data querying" .
+
+<protocols/grpc> a skos:Concept ;
+    rdfs:label "gRPC" ;
+    skos:prefLabel "gRPC" ;
+    skos:definition "gRPC protocol for high-performance data streaming" .
+
+<protocols/jdbc> a skos:Concept ;
+    rdfs:label "JDBC" ;
+    skos:prefLabel "JDBC" ;
+    skos:definition "JDBC connection for direct database access" .
+
+<protocols/s3> a skos:Concept ;
+    rdfs:label "S3" ;
+    skos:prefLabel "S3" ;
+    skos:definition "S3-compatible object storage access" .
+
+<protocols/kafka> a skos:Concept ;
+    rdfs:label "Kafka" ;
+    skos:prefLabel "Kafka" ;
+    skos:definition "Apache Kafka for event streaming" .

@@ -1,0 +1,22 @@
+services:
+  graphdb:
+    image: ontotext/graphdb:10.8.0
+    container_name: dprod-graphdb
+    ports:
+      - "7200:7200"
+    volumes:
+      - graphdb-data:/opt/graphdb/home
+      - ./config:/opt/graphdb/config:ro
+    environment:
+      - GDB_HEAP_SIZE=${GRAPHDB_HEAP_SIZE:-2g}
+      - GDB_JAVA_OPTS=-Dgraphdb.home=/opt/graphdb/home -Dgraphdb.workbench.cors.enable=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7200/rest/repositories"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  graphdb-data:

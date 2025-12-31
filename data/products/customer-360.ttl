@@ -1,0 +1,42 @@
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@base <https://data.vcondition.com/> .
+
+# Customer 360 Data Product
+<products/customer-360> a dprod:DataProduct ;
+    rdfs:label "Customer 360" ;
+    dct:title "Customer 360 Data Product" ;
+    dct:description "Unified customer view combining CRM, transactions, support interactions, and behavioral data to provide a complete picture of each customer" ;
+    dprod:dataProductOwner <agents/customer-data-team> ;
+    dprod:domain <domains/customer-analytics> ;
+    dprod:lifecycleStatus <https://ekgf.github.io/dprod/data/lifecycle-status/Consume> ;
+    dprod:purpose "Enable personalized marketing, improve customer service, and optimize customer lifetime value" ;
+    dprod:outputPort <services/customer-360-api> ;
+    dct:created "2024-01-15"^^xsd:date ;
+    dct:modified "2024-12-01"^^xsd:date .
+
+# Output Port (REST API)
+<services/customer-360-api> a dcat:DataService ;
+    rdfs:label "Customer 360 REST API" ;
+    dct:description "RESTful API providing access to unified customer profiles" ;
+    dcat:endpointURL <https://api.vcondition.com/v1/customers> ;
+    dcat:endpointDescription <https://api.vcondition.com/v1/customers/openapi.yaml> ;
+    dprod:protocol <protocols/rest> ;
+    dcat:servesDataset <datasets/customer-master> .
+
+# Dataset
+<datasets/customer-master> a dcat:Dataset ;
+    rdfs:label "Customer Master Dataset" ;
+    dct:title "Customer Master Dataset" ;
+    dct:description "Golden record of all customers with unified attributes from multiple source systems" ;
+    dcat:distribution <distributions/customer-master-json> .
+
+# Distribution
+<distributions/customer-master-json> a dcat:Distribution ;
+    rdfs:label "Customer Master - JSON" ;
+    dct:format <https://www.iana.org/assignments/media-types/application/json> ;
+    dcat:mediaType "application/json" .

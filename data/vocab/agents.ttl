@@ -1,0 +1,31 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@base <https://data.vcondition.com/> .
+
+# Data Product Owners and Teams
+
+<agents/customer-data-team> a prov:Agent, foaf:Group ;
+    rdfs:label "Customer Data Team" ;
+    foaf:name "Customer Data Team" ;
+    rdfs:comment "Team responsible for customer data products and customer analytics" .
+
+<agents/sales-team> a prov:Agent, foaf:Group ;
+    rdfs:label "Sales Analytics Team" ;
+    foaf:name "Sales Analytics Team" ;
+    rdfs:comment "Team responsible for sales data products and revenue analytics" .
+
+<agents/hr-team> a prov:Agent, foaf:Group ;
+    rdfs:label "HR Analytics Team" ;
+    foaf:name "HR Analytics Team" ;
+    rdfs:comment "Team responsible for workforce data products and HR analytics" .
+
+<agents/finance-team> a prov:Agent, foaf:Group ;
+    rdfs:label "Finance Team" ;
+    foaf:name "Finance Team" ;
+    rdfs:comment "Team responsible for financial data products and reporting" .
+
+<agents/marketing-team> a prov:Agent, foaf:Group ;
+    rdfs:label "Marketing Analytics Team" ;
+    foaf:name "Marketing Analytics Team" ;
+    rdfs:comment "Team responsible for marketing data products and campaign analytics" .

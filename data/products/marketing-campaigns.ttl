@@ -1,0 +1,42 @@
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@base <https://data.vcondition.com/> .
+
+# Marketing Campaigns Data Product
+<products/marketing-campaigns> a dprod:DataProduct ;
+    rdfs:label "Marketing Campaigns" ;
+    dct:title "Marketing Campaigns Data Product" ;
+    dct:description "Campaign performance analytics including reach, engagement, conversion, and ROI metrics across all marketing channels" ;
+    dprod:dataProductOwner <agents/marketing-team> ;
+    dprod:domain <domains/marketing> ;
+    dprod:lifecycleStatus <https://ekgf.github.io/dprod/data/lifecycle-status/Consume> ;
+    dprod:purpose "Optimize marketing spend, measure campaign effectiveness, and improve lead generation" ;
+    dprod:outputPort <services/marketing-campaigns-api> ;
+    dprod:inputPort <services/customer-360-api> ;
+    dct:created "2024-03-15"^^xsd:date ;
+    dct:modified "2024-11-30"^^xsd:date .
+
+# Output Port
+<services/marketing-campaigns-api> a dcat:DataService ;
+    rdfs:label "Marketing Campaigns API" ;
+    dct:description "REST API for campaign metrics and marketing analytics" ;
+    dcat:endpointURL <https://api.vcondition.com/v1/marketing/campaigns> ;
+    dprod:protocol <protocols/rest> ;
+    dcat:servesDataset <datasets/campaign-metrics> .
+
+# Dataset
+<datasets/campaign-metrics> a dcat:Dataset ;
+    rdfs:label "Campaign Metrics Dataset" ;
+    dct:title "Campaign Metrics Dataset" ;
+    dct:description "Marketing campaign performance metrics across all channels" ;
+    dcat:distribution <distributions/campaign-metrics-json> .
+
+# Distribution
+<distributions/campaign-metrics-json> a dcat:Distribution ;
+    rdfs:label "Campaign Metrics - JSON" ;
+    dct:format <https://www.iana.org/assignments/media-types/application/json> ;
+    dcat:mediaType "application/json" .

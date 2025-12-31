@@ -1,0 +1,35 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rep: <http://www.openrdf.org/config/repository#> .
+@prefix sr: <http://www.openrdf.org/config/repository/sail#> .
+@prefix sail: <http://www.openrdf.org/config/sail#> .
+@prefix graphdb: <http://www.ontotext.com/config/graphdb#> .
+
+[] a rep:Repository ;
+    rep:repositoryID "dprod-catalog" ;
+    rdfs:label "DPROD Data Product Catalog" ;
+    rep:repositoryImpl [
+        rep:repositoryType "graphdb:SailRepository" ;
+        sr:sailImpl [
+            sail:sailType "graphdb:Sail" ;
+
+            # Reasoning configuration
+            graphdb:ruleset "rdfsplus-optimized" ;
+            graphdb:check-for-inconsistencies "true" ;
+
+            # Storage configuration
+            graphdb:base-URL "https://data.vcondition.com/" ;
+            graphdb:repository-type "file-repository" ;
+            graphdb:imports "" ;
+            graphdb:isShacl "true" ;
+
+            # SHACL configuration (CRITICAL: must be enabled at creation time)
+            graphdb:validationEnabled "true" ;
+            graphdb:validationResultsLimitPerConstraint "1000" ;
+            graphdb:logValidationPlans "false" ;
+            graphdb:logValidationViolations "true" ;
+            graphdb:parallelValidation "true" ;
+
+            # Performance tuning
+            graphdb:entity-index-size "10000000"
+        ]
+    ] .

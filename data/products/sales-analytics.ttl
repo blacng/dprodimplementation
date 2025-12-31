@@ -1,0 +1,42 @@
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@base <https://data.vcondition.com/> .
+
+# Sales Analytics Data Product
+<products/sales-analytics> a dprod:DataProduct ;
+    rdfs:label "Sales Analytics" ;
+    dct:title "Sales Analytics Data Product" ;
+    dct:description "Comprehensive sales performance analytics including pipeline metrics, conversion rates, and revenue forecasting" ;
+    dprod:dataProductOwner <agents/sales-team> ;
+    dprod:domain <domains/sales-operations> ;
+    dprod:lifecycleStatus <https://ekgf.github.io/dprod/data/lifecycle-status/Build> ;
+    dprod:purpose "Enable data-driven sales decisions, forecast revenue, and optimize sales processes" ;
+    dprod:outputPort <services/sales-analytics-api> ;
+    dprod:inputPort <services/customer-360-api> ;
+    dct:created "2024-06-01"^^xsd:date ;
+    dct:modified "2024-11-15"^^xsd:date .
+
+# Output Port
+<services/sales-analytics-api> a dcat:DataService ;
+    rdfs:label "Sales Analytics API" ;
+    dct:description "GraphQL API for sales metrics and forecasting" ;
+    dcat:endpointURL <https://api.vcondition.com/v1/sales> ;
+    dprod:protocol <protocols/graphql> ;
+    dcat:servesDataset <datasets/sales-metrics> .
+
+# Dataset
+<datasets/sales-metrics> a dcat:Dataset ;
+    rdfs:label "Sales Metrics Dataset" ;
+    dct:title "Sales Metrics Dataset" ;
+    dct:description "Aggregated sales metrics including pipeline, conversions, and revenue data" ;
+    dcat:distribution <distributions/sales-metrics-json> .
+
+# Distribution
+<distributions/sales-metrics-json> a dcat:Distribution ;
+    rdfs:label "Sales Metrics - JSON" ;
+    dct:format <https://www.iana.org/assignments/media-types/application/json> ;
+    dcat:mediaType "application/json" .

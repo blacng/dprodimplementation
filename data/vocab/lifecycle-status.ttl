@@ -1,0 +1,36 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+
+# DPROD Lifecycle Status values (from DPROD specification)
+# These are the official lifecycle statuses defined by DPROD
+
+<https://ekgf.github.io/dprod/data/lifecycle-status/Ideation> a skos:Concept ;
+    rdfs:label "Ideation" ;
+    skos:prefLabel "Ideation" ;
+    skos:definition "Initial concept phase where the data product is being defined and scoped" .
+
+<https://ekgf.github.io/dprod/data/lifecycle-status/Design> a skos:Concept ;
+    rdfs:label "Design" ;
+    skos:prefLabel "Design" ;
+    skos:definition "Design phase where data models, schemas, and interfaces are being designed" .
+
+<https://ekgf.github.io/dprod/data/lifecycle-status/Build> a skos:Concept ;
+    rdfs:label "Build" ;
+    skos:prefLabel "Build" ;
+    skos:definition "Development phase where the data product is being implemented" .
+
+<https://ekgf.github.io/dprod/data/lifecycle-status/Deploy> a skos:Concept ;
+    rdfs:label "Deploy" ;
+    skos:prefLabel "Deploy" ;
+    skos:definition "Deployment phase where the data product is being released to production" .
+
+<https://ekgf.github.io/dprod/data/lifecycle-status/Consume> a skos:Concept ;
+    rdfs:label "Consume" ;
+    skos:prefLabel "Consume" ;
+    skos:definition "Active consumption phase where the data product is available for consumers" .
+
+<https://ekgf.github.io/dprod/data/lifecycle-status/Retire> a skos:Concept ;
+    rdfs:label "Retire" ;
+    skos:prefLabel "Retire" ;
+    skos:definition "Retirement phase where the data product is being deprecated or decommissioned" .
