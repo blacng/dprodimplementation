@@ -91,6 +91,20 @@ async def search_products(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/detail/{product_uri:path}", response_model=DataProductDetailResponse)
+async def get_product_detail(product_uri: str) -> DataProductDetailResponse:
+    """Get comprehensive details about a data product including nested ports, datasets, and distributions."""
+    client = get_client()
+
+    try:
+        detail = client.get_product_detail(product_uri)
+        return detail
+    except NotFoundError:
+        raise HTTPException(status_code=404, detail=f"Product not found: {product_uri}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/{product_uri:path}", response_model=DataProductResponse)
 async def get_product(product_uri: str) -> DataProductResponse:
     """Get detailed information about a specific data product."""
@@ -110,20 +124,6 @@ async def get_product(product_uri: str) -> DataProductResponse:
             output_ports=product.output_ports or [],
             input_ports=product.input_ports or [],
         )
-    except NotFoundError:
-        raise HTTPException(status_code=404, detail=f"Product not found: {product_uri}")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/{product_uri:path}/detail", response_model=DataProductDetailResponse)
-async def get_product_detail(product_uri: str) -> DataProductDetailResponse:
-    """Get comprehensive details about a data product including nested ports, datasets, and distributions."""
-    client = get_client()
-
-    try:
-        detail = client.get_product_detail(product_uri)
-        return detail
     except NotFoundError:
         raise HTTPException(status_code=404, detail=f"Product not found: {product_uri}")
     except Exception as e:

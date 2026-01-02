@@ -59,7 +59,7 @@ export const productsApi = {
   },
 
   getDetail: (uri: string): Promise<DataProductDetail> => {
-    return fetchJSON(`/api/v1/products/${encodeURIComponent(uri)}/detail`);
+    return fetchJSON(`/api/v1/products/detail/${encodeURIComponent(uri)}`);
   },
 
   search: (query: string): Promise<DataProductSummary[]> => {

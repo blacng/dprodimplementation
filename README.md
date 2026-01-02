@@ -142,7 +142,7 @@ The Python FastAPI service exposes DPROD data via REST endpoints.
 | `/api/v1/products` | GET | List all data products |
 | `/api/v1/products` | POST | Create a new data product |
 | `/api/v1/products/{uri}` | GET | Get product summary |
-| `/api/v1/products/{uri}/detail` | GET | Get full product with nested ports/datasets |
+| `/api/v1/products/detail/{uri}` | GET | Get full product with nested ports/datasets |
 | `/api/v1/products/search?q=` | GET | Search products by keyword |
 | `/api/v1/products/domains/` | GET | List domains with product counts |
 | `/api/v1/lineage/{uri}` | GET | Get lineage graph for a product |
