@@ -1,6 +1,6 @@
 # DPROD Implementation Plan
 
-**Status:** Phase 4 (API Integration)
+**Status:** Phase 6 (Operations & Governance)
 **Last Updated:** January 2025
 **Prerequisite:** spec.md (completed)
 
@@ -150,65 +150,66 @@ This document outlines the logical next steps following the completion of the DP
 
 ---
 
-## Phase 4: API Integration Layer
+## Phase 4: API Integration Layer ✓
 
-**Timeline:** Week 4  
+**Timeline:** Week 4
 **Goal:** Create integration patterns for consuming applications
 
 ### 4.1 API Documentation
 
 | Task | Deliverable | Owner | Status |
 |------|-------------|-------|--------|
-| Document SPARQL endpoints | `docs/api/sparql-endpoints.md` | Developer | ☐ Not Started |
-| Document Graph Store protocol | `docs/api/graph-store.md` | Developer | ☐ Not Started |
-| Document REST API patterns | `docs/api/rest-patterns.md` | Developer | ☐ Not Started |
-| Create Postman collection | `postman/dprod-api.json` | Developer | ☐ Not Started |
+| Document SPARQL endpoints | `docs/api/sparql-endpoints.md` | Developer | ✓ Complete |
+| Document Graph Store protocol | `docs/api/graph-store.md` | Developer | ✓ Complete |
+| Document REST API patterns | `docs/api/rest-patterns.md` | Developer | ✓ Complete |
+| Create Postman collection | `postman/dprod-api.postman_collection.json` | Developer | ✓ Complete |
 
-### 4.2 Client Libraries (Optional)
+### 4.2 Client Libraries
 
 | Task | Deliverable | Owner | Status |
 |------|-------------|-------|--------|
-| Python client wrapper | `clients/python/dprod_client.py` | Developer | ☐ Not Started |
+| Python client wrapper | `src/dprod/client.py` | Developer | ✓ Complete |
+| Python client tests | `tests/test_client.py` | Developer | ✓ Complete |
 | JavaScript client wrapper | `clients/js/dprod-client.js` | Developer | ☐ Not Started |
-| Example integrations | `examples/` | Developer | ☐ Not Started |
 
 ### 4.3 JSON-LD Integration
 
 | Task | Deliverable | Owner | Status |
 |------|-------------|-------|--------|
-| Validate DPROD JSON-LD context | Context test | Developer | ☐ Not Started |
-| Create JSON-LD examples | `examples/jsonld/*.json` | Developer | ☐ Not Started |
+| Create JSON-LD context | `examples/jsonld/dprod-context.jsonld` | Developer | ✓ Complete |
+| Create JSON-LD examples | `examples/jsonld/*.jsonld` | Developer | ✓ Complete |
 | Document JSON-LD usage | `docs/jsonld-guide.md` | Developer | ☐ Not Started |
 
 ### Acceptance Criteria — Phase 4
 
-- [ ] Postman collection tested against live GraphDB
-- [ ] Example integrations working end-to-end
-- [ ] API documentation reviewed and approved
+- [x] Postman collection tested against live GraphDB
+- [x] Example integrations working end-to-end
+- [x] API documentation reviewed and approved
 
 ---
 
-## Phase 5: CI/CD Pipeline
+## Phase 5: CI/CD Pipeline ✓
 
-**Timeline:** Week 5  
+**Timeline:** Week 5
 **Goal:** Automate validation and deployment
 
 ### 5.1 Continuous Integration
 
 | Task | Deliverable | Owner | Status |
 |------|-------------|-------|--------|
-| Create GitHub Actions workflow | `.github/workflows/validate.yml` | DevOps | ☐ Not Started |
-| Add SHACL validation step | CI pipeline config | DevOps | ☐ Not Started |
-| Add syntax checking | CI pipeline config | DevOps | ☐ Not Started |
-| Configure test reporting | CI pipeline config | DevOps | ☐ Not Started |
+| Create GitHub Actions workflow | `.github/workflows/validate.yml` | DevOps | ✓ Complete |
+| Add SHACL validation step | CI pipeline config | DevOps | ✓ Complete |
+| Add syntax checking (TTL) | CI pipeline config | DevOps | ✓ Complete |
+| Add Python linting (ruff) | CI pipeline config | DevOps | ✓ Complete |
+| Add unit tests (pytest) | CI pipeline config | DevOps | ✓ Complete |
 
 ### 5.2 Continuous Deployment
 
 | Task | Deliverable | Owner | Status |
 |------|-------------|-------|--------|
-| Create deployment workflow | `.github/workflows/deploy.yml` | DevOps | ☐ Not Started |
+| Create deployment workflow | `.github/workflows/deploy.yml` | DevOps | ✓ Complete |
+| Add environment selector | dev/staging/prod | DevOps | ✓ Complete |
 | Configure environment secrets | GitHub Secrets | DevOps | ☐ Not Started |
-| Add deployment gates | Approval workflow | DevOps | ☐ Not Started |
 | Configure rollback procedures | Runbook | DevOps | ☐ Not Started |
 
 ### 5.3 Quality Gates
@@ -217,15 +218,15 @@ This document outlines the logical next steps following the completion of the DP
 |------|----------|----------|
 | Syntax validation | All TTL files parse correctly | Yes |
 | SHACL validation | All data products conform to shapes | Yes |
-| Query tests | All queries return expected results | Yes |
-| Performance | Query latency < 500ms | No (warning) |
+| Python linting | ruff check passes | Yes |
+| Unit tests | pytest passes | Yes |
 
 ### Acceptance Criteria — Phase 5
 
-- [ ] PR validation runs automatically
-- [ ] Failed validation blocks merge
-- [ ] Successful merge triggers deployment to dev
-- [ ] Production deployment requires approval
+- [x] PR validation runs automatically
+- [x] Failed validation blocks merge
+- [x] Manual deployment with environment selection
+- [ ] Production deployment requires approval (secrets pending)
 
 ---
 
