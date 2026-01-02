@@ -1,0 +1,28 @@
+# Dependencies
+.venv/
+node_modules/
+__pycache__/
+
+# Development
+.git/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+
+# GraphDB data
+data/
+ontologies/
+shapes/
+
+# Tests
+tests/
+
+# Documentation
+.claude/
+*.md
+!README.md
+
+# Config files not needed for deployment
+docker-compose.yml
+Makefile
+.env*

@@ -1,0 +1,6 @@
+# Minimal requirements for serverless deployment (Vercel, AWS Lambda, etc.)
+# Chat feature disabled - use pip install .[full] for local development
+requests>=2.31.0
+fastapi>=0.109.0
+uvicorn>=0.27.0
+websockets>=12.0
