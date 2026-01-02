@@ -31,7 +31,7 @@ async def get_lineage(
     direction: str = Query(
         "full",
         description="Direction to trace: upstream, downstream, or full",
-        regex="^(upstream|downstream|full)$",
+        pattern="^(upstream|downstream|full)$",
     ),
     depth: int = Query(
         1,

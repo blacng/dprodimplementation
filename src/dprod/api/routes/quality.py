@@ -1,6 +1,6 @@
 """Quality REST API endpoints."""
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException
 
 from ...client import DPRODClient
 
@@ -206,7 +206,7 @@ async def get_quality_report() -> dict:
 
 @router.get("/{check_type}")
 async def get_quality_check(
-    check_type: str = Query(..., description="Type of quality check to run"),
+    check_type: str,
 ) -> dict:
     """Run a specific quality check."""
     if check_type not in CHECK_TYPES:
