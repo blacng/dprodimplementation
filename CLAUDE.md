@@ -10,6 +10,14 @@ Key specifications are in `.claude/docs/`:
 - `spec.md` - Complete technical specification for GraphDB configuration, SHACL validation, SPARQL queries, and API patterns
 - `plan.md` - Implementation phases and project structure
 
+## Important: Planning Before Development
+
+**Always update `.claude/docs/plan.md` before starting any new feature development.** This ensures:
+- Features are properly designed and documented
+- Implementation phases are tracked
+- Dependencies and acceptance criteria are defined
+- The project maintains a clear development roadmap
+
 ## Development Commands
 
 ```bash

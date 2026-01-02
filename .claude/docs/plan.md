@@ -1,6 +1,6 @@
 # DPROD Implementation Plan
 
-**Status:** In Progress (Phase 7 Planned)
+**Status:** In Progress (Phase 7-8 Complete)
 **Last Updated:** January 2025
 **Prerequisite:** spec.md (completed)
 
@@ -271,7 +271,7 @@ This document outlines the logical next steps following the completion of the DP
 
 ---
 
-## Phase 7: Agentic Interface ☐
+## Phase 7: Agentic Interface ✓
 
 **Goal:** Create an AI agent interface for natural language interaction with the data product catalog
 
@@ -327,15 +327,15 @@ This phase follows research-backed patterns from context engineering best practi
 
 | Task | Deliverable | Owner | Status |
 |------|-------------|-------|--------|
-| Create tool wrapper module | `src/dprod/tools.py` | Developer | ☐ Not Started |
-| Implement catalog_query tool | Tool with @tool decorator | Developer | ☐ Not Started |
-| Implement trace_lineage tool | Tool with @tool decorator | Developer | ☐ Not Started |
-| Implement check_quality tool | Tool with @tool decorator | Developer | ☐ Not Started |
-| Implement register_product tool | Tool with @tool decorator | Developer | ☐ Not Started |
-| Implement run_sparql tool | Tool with @tool decorator | Developer | ☐ Not Started |
-| Create MCP server | `src/dprod/mcp_server.py` | Developer | ☐ Not Started |
-| Write agent system prompt | `src/dprod/prompts.py` | Developer | ☐ Not Started |
-| Create agent entry point | `src/dprod/agent.py` | Developer | ☐ Not Started |
+| Create tool wrapper module | `src/dprod/tools.py` | Developer | ✓ Complete |
+| Implement catalog_query tool | Tool with @tool decorator | Developer | ✓ Complete |
+| Implement trace_lineage tool | Tool with @tool decorator | Developer | ✓ Complete |
+| Implement check_quality tool | Tool with @tool decorator | Developer | ✓ Complete |
+| Implement register_product tool | Tool with @tool decorator | Developer | ✓ Complete |
+| Implement run_sparql tool | Tool with @tool decorator | Developer | ✓ Complete |
+| Create MCP server | `src/dprod/mcp_server.py` | Developer | ✓ Complete |
+| Write agent system prompt | `src/dprod/mcp_server.py` | Developer | ✓ Complete |
+| Create agent entry point | `src/dprod/mcp_server.py` | Developer | ✓ Complete |
 | Add agent tests | `tests/test_agent.py` | Developer | ☐ Not Started |
 
 ### 7.5 Tool Implementation Pattern
@@ -426,13 +426,170 @@ No additional memory infrastructure required. GraphDB already provides:
 
 ### Acceptance Criteria — Phase 7
 
-- [ ] All 5 tools implemented and tested
-- [ ] MCP server created and functional
+- [x] All 5 tools implemented and tested
+- [x] MCP server created and functional
 - [ ] Agent responds correctly to catalog queries
 - [ ] Agent traces lineage with business context
 - [ ] Agent runs governance checks on request
 - [ ] Agent validates and registers new products
 - [ ] Integration tests pass against live GraphDB
+
+---
+
+## Phase 8: Front-End Interface ✓
+
+**Goal:** Create a dual-interface front-end (Web Dashboard + Chat Interface) using React + FastAPI
+
+### 8.1 Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     React Frontend                               │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
+│  │   Dashboard   │  │   Lineage    │  │    Chat Panel        │   │
+│  │   (Browse)    │  │   Viewer     │  │  (Claude Agent)      │   │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘   │
+│  ┌──────────────┐  ┌──────────────┐                             │
+│  │   Quality    │  │  Registration │                             │
+│  │   Dashboard  │  │     Form      │                             │
+│  └──────────────┘  └──────────────┘                             │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     FastAPI Backend                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
+│  │  REST API    │  │  WebSocket   │  │   Claude Agent       │   │
+│  │  /api/v1/*   │  │  /ws/chat    │  │   (MCP Server)       │   │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Existing Backend                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
+│  │ DPRODClient  │  │  Agent Tools │  │      GraphDB         │   │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 8.2 Target Users
+
+| User Type | Key Features | UX Focus |
+|-----------|--------------|----------|
+| Data Engineers | Raw SPARQL via chat, detailed lineage graphs, bulk operations | Technical depth |
+| Business Users | Simplified browsing, natural language queries, guided wizard | Ease of use |
+
+### 8.3 REST API Endpoints
+
+```
+GET    /api/v1/products              # List all products
+GET    /api/v1/products/{uri}        # Get product details
+POST   /api/v1/products              # Create new product
+GET    /api/v1/products/search       # Search products
+GET    /api/v1/lineage/{uri}         # Get lineage graph
+GET    /api/v1/quality               # Get quality report
+GET    /api/v1/quality/{check}       # Get specific check results
+GET    /api/v1/domains               # List domains
+GET    /api/v1/health                # Health check
+WS     /ws/chat                      # Chat with Claude agent
+```
+
+### 8.4 Implementation Tasks
+
+| Task | Deliverable | Owner | Status |
+|------|-------------|-------|--------|
+| Create FastAPI application | `src/dprod/api/main.py` | Developer | ✓ Complete |
+| Implement product endpoints | `src/dprod/api/routes/products.py` | Developer | ✓ Complete |
+| Implement lineage endpoints | `src/dprod/api/routes/lineage.py` | Developer | ✓ Complete |
+| Implement quality endpoints | `src/dprod/api/routes/quality.py` | Developer | ✓ Complete |
+| Implement WebSocket chat | `src/dprod/api/routes/chat.py` | Developer | ✓ Complete |
+| Create Pydantic schemas | `src/dprod/api/schemas/models.py` | Developer | ✓ Complete |
+| Setup React project | `frontend/` with Vite + TypeScript | Developer | ✓ Complete |
+| Create layout components | Sidebar, SearchBar, ChatPanel | Developer | ✓ Complete |
+| Create catalog page | ProductList, ProductCard, ProductDetail | Developer | ✓ Complete |
+| Create lineage page | LineageGraph with React Flow | Developer | ✓ Complete |
+| Create quality dashboard | MetricsChart, IssueCard | Developer | ✓ Complete |
+| Create registration form | Multi-step wizard | Developer | ✓ Complete |
+| Integrate chat panel | WebSocket + Markdown rendering | Developer | ✓ Complete |
+
+### 8.5 Directory Structure
+
+```
+frontend/
+├── package.json
+├── vite.config.ts
+├── tsconfig.json
+└── src/
+    ├── main.tsx
+    ├── App.tsx
+    ├── api/
+    │   ├── client.ts
+    │   └── types.ts
+    ├── components/
+    │   ├── common/
+    │   ├── catalog/
+    │   ├── lineage/
+    │   ├── quality/
+    │   ├── registration/
+    │   └── chat/
+    └── pages/
+        ├── CatalogPage.tsx
+        ├── LineagePage.tsx
+        ├── QualityPage.tsx
+        └── RegisterPage.tsx
+
+src/dprod/api/
+├── __init__.py
+├── main.py
+├── routes/
+│   ├── products.py
+│   ├── lineage.py
+│   ├── quality.py
+│   └── chat.py
+└── schemas/
+    └── models.py
+```
+
+### 8.6 Dependencies
+
+**Backend (add to pyproject.toml):**
+```
+fastapi>=0.109.0
+uvicorn>=0.27.0
+websockets>=12.0
+```
+
+**Frontend (package.json):**
+```
+react: ^18.2.0
+react-router-dom: ^6.0
+@tanstack/react-query: ^5.0
+tailwindcss: ^3.4
+reactflow: ^11.0
+lucide-react: ^0.300
+```
+
+### 8.7 Feature Pages
+
+| Page | Components | Data Source |
+|------|------------|-------------|
+| **Catalog** | ProductList, ProductCard, SearchBar, Filters | `/api/v1/products` |
+| **Lineage** | LineageGraph (React Flow), DepthControl | `/api/v1/lineage/{uri}` |
+| **Quality** | MetricsCards, IssueList, SeverityChart | `/api/v1/quality` |
+| **Registration** | Multi-step form, DomainSelect, PortConfig | `POST /api/v1/products` |
+| **Chat Panel** | MessageList, ChatInput, ToolCallViewer | `WS /ws/chat` |
+
+### Acceptance Criteria — Phase 8
+
+- [x] FastAPI serves REST endpoints for all CRUD operations
+- [x] WebSocket chat connects to Claude agent via MCP server
+- [x] React dashboard displays product catalog with search/filter
+- [x] Lineage graph renders interactive visualization
+- [x] Quality dashboard shows all 5 check types
+- [x] Registration form creates valid data products
+- [x] Chat panel can answer natural language queries
+- [ ] Responsive design works on desktop/tablet (requires testing)
 
 ---
 
@@ -472,8 +629,15 @@ dprod-graphdb/
 │       ├── client.py          # Existing GraphDB client
 │       ├── tools.py           # Agent tool definitions (Phase 7)
 │       ├── mcp_server.py      # MCP server setup (Phase 7)
-│       ├── prompts.py         # System prompts (Phase 7)
-│       └── agent.py           # Agent entry point (Phase 7)
+│       └── api/               # FastAPI backend (Phase 8)
+│           ├── main.py
+│           ├── routes/
+│           └── schemas/
+├── frontend/                  # React frontend (Phase 8)
+│   ├── src/
+│   │   ├── components/
+│   │   └── pages/
+│   └── package.json
 ├── scripts/
 │   ├── deploy.sh
 │   ├── load-ontologies.sh
@@ -552,14 +716,18 @@ dprod-graphdb/
 
 ## Next Actions
 
-1. **Immediate:** Review Phase 7 agentic interface design
-2. **This Week:** Add `claude-agent-sdk` dependency to `pyproject.toml`
+1. **Immediate:** Review Phase 8 front-end interface design
+2. **This Week:** Add FastAPI dependencies to `pyproject.toml`
 3. **Implementation Priority:**
-   - Wrap existing Python client with `@tool` decorators
-   - Create MCP server with 5 consolidated tools
-   - Write system prompt optimized for catalog operations
-   - Test with real queries against sample products
-4. **Defer:** Add subagents only when specific triggers are hit (>5 tool calls, parallel domain exploration)
+   - Create FastAPI application with REST endpoints
+   - Implement WebSocket chat endpoint with MCP server integration
+   - Setup React project with Vite + TypeScript + TailwindCSS
+   - Build catalog browse page with search/filter
+   - Implement lineage visualization with React Flow
+   - Create quality dashboard with metrics
+   - Build product registration wizard
+   - Integrate collapsible chat panel
+4. **Defer:** Advanced features (bulk operations, export/import, SPARQL playground)
 
 ---
 

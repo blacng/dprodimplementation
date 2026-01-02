@@ -1,7 +1,7 @@
 # DPROD GraphDB Makefile
 # Usage: make [target]
 
-.PHONY: help up down logs create-repo load-ontologies load-shapes load-vocab load-products setup setup-full health clean shell wait query queries-list test test-valid test-invalid test-validate-file
+.PHONY: help up down logs create-repo load-ontologies load-shapes load-vocab load-products setup setup-full health clean shell wait query queries-list test test-valid test-invalid test-validate-file api frontend dev
 
 # Load environment variables
 -include .env
@@ -380,3 +380,30 @@ test-validate-file: ## Validate a single TTL file (FILE=path/to/file.ttl)
 		echo "$(RED)Failed to load file (syntax error)$(NC)"; \
 	fi
 	@curl -sf -X DELETE "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3C$(TEST_GRAPH)%3E" > /dev/null 2>&1 || true
+
+# ============================================
+# Web Application
+# ============================================
+
+api: ## Start FastAPI backend server (port 8000)
+	@echo "$(GREEN)Starting FastAPI server...$(NC)"
+	cd src && uv run uvicorn dprod.api.main:app --reload --host 0.0.0.0 --port 8000
+
+frontend: ## Start React frontend dev server (port 5173)
+	@echo "$(GREEN)Starting React dev server...$(NC)"
+	cd frontend && npm run dev
+
+frontend-build: ## Build React frontend for production
+	@echo "$(GREEN)Building React frontend...$(NC)"
+	cd frontend && npm run build
+
+frontend-install: ## Install frontend dependencies
+	@echo "$(GREEN)Installing frontend dependencies...$(NC)"
+	cd frontend && npm install
+
+dev: ## Start both API and frontend (requires tmux or run in separate terminals)
+	@echo "$(YELLOW)Run in separate terminals:$(NC)"
+	@echo "  make api      # Terminal 1: FastAPI at http://localhost:8000"
+	@echo "  make frontend # Terminal 2: React at http://localhost:5173"
+	@echo ""
+	@echo "Or run: make api & make frontend"
