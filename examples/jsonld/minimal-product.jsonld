@@ -1,0 +1,10 @@
+{
+  "@context": "./dprod-context.jsonld",
+  "@id": "https://data.example.com/products/my-product",
+  "@type": "DataProduct",
+  "label": "My Data Product",
+  "description": "A minimal data product example",
+  "dataProductOwner": "https://data.example.com/agents/my-team",
+  "lifecycleStatus": "https://ekgf.github.io/dprod/data/lifecycle-status/Design",
+  "created": "2025-01-02"
+}
