@@ -1,18 +1,24 @@
-# Dependencies
+# Python (not deploying API to Vercel)
+src/
 .venv/
-node_modules/
 __pycache__/
+*.py
+*.pyc
+pyproject.toml
+uv.lock
+requirements.txt
 
 # Development
 .git/
 .pytest_cache/
 .ruff_cache/
-*.pyc
 
 # GraphDB data
 data/
 ontologies/
 shapes/
+queries/
+config/
 
 # Tests
 tests/
@@ -22,7 +28,7 @@ tests/
 *.md
 !README.md
 
-# Config files not needed for deployment
+# Config files
 docker-compose.yml
 Makefile
 .env*
