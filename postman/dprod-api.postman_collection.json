@@ -1,0 +1,433 @@
+{
+  "info": {
+    "_postman_id": "dprod-catalog-api",
+    "name": "DPROD Catalog API",
+    "description": "GraphDB SPARQL API for the DPROD (Data Product Ontology) catalog.\n\n## Setup\n\n1. Import this collection\n2. Import the `dprod-environment.postman_environment.json` file\n3. Ensure GraphDB is running: `make up`\n4. Load data: `make setup`\n\n## Endpoints\n\n- **SPARQL Query**: `GET/POST {{baseUrl}}/repositories/{{repository}}`\n- **Graph Store**: `{{baseUrl}}/repositories/{{repository}}/statements`\n\n## Authentication\n\nNo authentication required for local development.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:7200",
+      "type": "string"
+    },
+    {
+      "key": "repository",
+      "value": "dprod-catalog",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Check GraphDB Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rest/repositories",
+              "host": ["{{baseUrl}}"],
+              "path": ["rest", "repositories"]
+            },
+            "description": "List all repositories to verify GraphDB is running."
+          }
+        },
+        {
+          "name": "Check Repository Exists",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}/size",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}", "size"]
+            },
+            "description": "Get the number of statements in the repository."
+          }
+        }
+      ],
+      "description": "Health check endpoints for GraphDB and the DPROD repository."
+    },
+    {
+      "name": "Core Queries",
+      "item": [
+        {
+          "name": "List All Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/sparql-results+json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}?query=PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX dcat: <http://www.w3.org/ns/dcat#>\nPREFIX dct: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?product ?label ?description ?owner ?ownerLabel ?domain ?domainLabel ?status ?created ?modified\nWHERE {\n  ?product a dprod:DataProduct ;\n           rdfs:label ?label ;\n           dprod:dataProductOwner ?owner ;\n           dprod:lifecycleStatus ?status .\n\n  OPTIONAL { ?product dct:description ?description }\n  OPTIONAL { ?product dprod:domain ?domain }\n  OPTIONAL { ?product dct:created ?created }\n  OPTIONAL { ?product dct:modified ?modified }\n  OPTIONAL { ?owner rdfs:label ?ownerLabel }\n  OPTIONAL { ?domain rdfs:label ?domainLabel }\n}\nORDER BY ?label",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX dcat: <http://www.w3.org/ns/dcat#>\nPREFIX dct: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?product ?label ?description ?owner ?ownerLabel ?domain ?domainLabel ?status ?created ?modified\nWHERE {\n  ?product a dprod:DataProduct ;\n           rdfs:label ?label ;\n           dprod:dataProductOwner ?owner ;\n           dprod:lifecycleStatus ?status .\n\n  OPTIONAL { ?product dct:description ?description }\n  OPTIONAL { ?product dprod:domain ?domain }\n  OPTIONAL { ?product dct:created ?created }\n  OPTIONAL { ?product dct:modified ?modified }\n  OPTIONAL { ?owner rdfs:label ?ownerLabel }\n  OPTIONAL { ?domain rdfs:label ?domainLabel }\n}\nORDER BY ?label"
+                }
+              ]
+            },
+            "description": "List all data products in the catalog with owner, domain, and status information."
+          }
+        },
+        {
+          "name": "Get Product Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "text/turtle"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}?query=PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX dcat: <http://www.w3.org/ns/dcat#>\nPREFIX dct: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n  ?product ?p ?o .\n  ?outputPort ?op ?ov .\n  ?inputPort ?ip ?iv .\n  ?dataset ?dp ?dv .\n  ?distribution ?distp ?distv .\n}\nWHERE {\n  BIND(<https://data.example.com/products/customer-360> AS ?product)\n\n  ?product a dprod:DataProduct ;\n           ?p ?o .\n\n  OPTIONAL {\n    ?product dprod:outputPort ?outputPort .\n    ?outputPort ?op ?ov .\n  }\n\n  OPTIONAL {\n    ?product dprod:inputPort ?inputPort .\n    ?inputPort ?ip ?iv .\n  }\n\n  OPTIONAL {\n    ?outputPort dcat:servesDataset ?dataset .\n    ?dataset ?dp ?dv .\n  }\n\n  OPTIONAL {\n    ?dataset dcat:distribution ?distribution .\n    ?distribution ?distp ?distv .\n  }\n}",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX dcat: <http://www.w3.org/ns/dcat#>\nPREFIX dct: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n  ?product ?p ?o .\n  ?outputPort ?op ?ov .\n  ?inputPort ?ip ?iv .\n  ?dataset ?dp ?dv .\n  ?distribution ?distp ?distv .\n}\nWHERE {\n  BIND(<https://data.example.com/products/customer-360> AS ?product)\n\n  ?product a dprod:DataProduct ;\n           ?p ?o .\n\n  OPTIONAL {\n    ?product dprod:outputPort ?outputPort .\n    ?outputPort ?op ?ov .\n  }\n\n  OPTIONAL {\n    ?product dprod:inputPort ?inputPort .\n    ?inputPort ?ip ?iv .\n  }\n\n  OPTIONAL {\n    ?outputPort dcat:servesDataset ?dataset .\n    ?dataset ?dp ?dv .\n  }\n\n  OPTIONAL {\n    ?dataset dcat:distribution ?distribution .\n    ?distribution ?distp ?distv .\n  }\n}"
+                }
+              ]
+            },
+            "description": "Get detailed information about a specific data product including ports, datasets, and distributions.\n\n**Parameter**: Replace `customer-360` with the product ID."
+          }
+        },
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/sparql-results+json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}?query=PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX dct: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT DISTINCT ?product ?label ?description ?status ?matchedField\nWHERE {\n  ?product a dprod:DataProduct ;\n           rdfs:label ?label ;\n           dprod:lifecycleStatus ?status .\n\n  OPTIONAL { ?product dct:description ?description }\n\n  {\n    ?product rdfs:label ?matchValue .\n    FILTER(CONTAINS(LCASE(?matchValue), LCASE(\"customer\")))\n    BIND(\"label\" AS ?matchedField)\n  }\n  UNION\n  {\n    ?product dct:title ?matchValue .\n    FILTER(CONTAINS(LCASE(?matchValue), LCASE(\"customer\")))\n    BIND(\"title\" AS ?matchedField)\n  }\n  UNION\n  {\n    ?product dct:description ?matchValue .\n    FILTER(CONTAINS(LCASE(?matchValue), LCASE(\"customer\")))\n    BIND(\"description\" AS ?matchedField)\n  }\n  UNION\n  {\n    ?product dprod:purpose ?matchValue .\n    FILTER(CONTAINS(LCASE(?matchValue), LCASE(\"customer\")))\n    BIND(\"purpose\" AS ?matchedField)\n  }\n}\nORDER BY ?label",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX dct: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT DISTINCT ?product ?label ?description ?status ?matchedField\nWHERE {\n  ?product a dprod:DataProduct ;\n           rdfs:label ?label ;\n           dprod:lifecycleStatus ?status .\n\n  OPTIONAL { ?product dct:description ?description }\n\n  {\n    ?product rdfs:label ?matchValue .\n    FILTER(CONTAINS(LCASE(?matchValue), LCASE(\"customer\")))\n    BIND(\"label\" AS ?matchedField)\n  }\n  UNION\n  {\n    ?product dct:title ?matchValue .\n    FILTER(CONTAINS(LCASE(?matchValue), LCASE(\"customer\")))\n    BIND(\"title\" AS ?matchedField)\n  }\n  UNION\n  {\n    ?product dct:description ?matchValue .\n    FILTER(CONTAINS(LCASE(?matchValue), LCASE(\"customer\")))\n    BIND(\"description\" AS ?matchedField)\n  }\n  UNION\n  {\n    ?product dprod:purpose ?matchValue .\n    FILTER(CONTAINS(LCASE(?matchValue), LCASE(\"customer\")))\n    BIND(\"purpose\" AS ?matchedField)\n  }\n}\nORDER BY ?label"
+                }
+              ]
+            },
+            "description": "Full-text search across product labels, titles, descriptions, and purposes.\n\n**Parameter**: Replace `customer` with your search term."
+          }
+        }
+      ],
+      "description": "Core catalog operations: list, get, and search products."
+    },
+    {
+      "name": "Filter Queries",
+      "item": [
+        {
+          "name": "Find by Domain",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/sparql-results+json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}?query=PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX dct: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?product ?label ?description ?status ?owner ?ownerLabel\nWHERE {\n  ?product a dprod:DataProduct ;\n           rdfs:label ?label ;\n           dprod:domain <https://data.example.com/domains/customer-analytics> ;\n           dprod:lifecycleStatus ?status ;\n           dprod:dataProductOwner ?owner .\n\n  OPTIONAL { ?product dct:description ?description }\n  OPTIONAL { ?owner rdfs:label ?ownerLabel }\n}\nORDER BY ?label",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX dct: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?product ?label ?description ?status ?owner ?ownerLabel\nWHERE {\n  ?product a dprod:DataProduct ;\n           rdfs:label ?label ;\n           dprod:domain <https://data.example.com/domains/customer-analytics> ;\n           dprod:lifecycleStatus ?status ;\n           dprod:dataProductOwner ?owner .\n\n  OPTIONAL { ?product dct:description ?description }\n  OPTIONAL { ?owner rdfs:label ?ownerLabel }\n}\nORDER BY ?label"
+                }
+              ]
+            },
+            "description": "Find all data products in a specific business domain.\n\n**Parameter**: Replace the domain URI with your target domain."
+          }
+        },
+        {
+          "name": "Find by Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/sparql-results+json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}?query=PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX dct: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?product ?label ?description ?domain ?domainLabel ?owner ?ownerLabel\nWHERE {\n  ?product a dprod:DataProduct ;\n           rdfs:label ?label ;\n           dprod:lifecycleStatus <https://data.example.com/lifecycle/Consume> ;\n           dprod:dataProductOwner ?owner .\n\n  OPTIONAL { ?product dct:description ?description }\n  OPTIONAL { ?product dprod:domain ?domain . ?domain rdfs:label ?domainLabel }\n  OPTIONAL { ?owner rdfs:label ?ownerLabel }\n}\nORDER BY ?label",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX dct: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?product ?label ?description ?domain ?domainLabel ?owner ?ownerLabel\nWHERE {\n  ?product a dprod:DataProduct ;\n           rdfs:label ?label ;\n           dprod:lifecycleStatus <https://data.example.com/lifecycle/Consume> ;\n           dprod:dataProductOwner ?owner .\n\n  OPTIONAL { ?product dct:description ?description }\n  OPTIONAL { ?product dprod:domain ?domain . ?domain rdfs:label ?domainLabel }\n  OPTIONAL { ?owner rdfs:label ?ownerLabel }\n}\nORDER BY ?label"
+                }
+              ]
+            },
+            "description": "Find all data products with a specific lifecycle status.\n\n**Valid statuses**: Ideation, Design, Build, Deploy, Consume, Retire"
+          }
+        },
+        {
+          "name": "Find by Owner",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/sparql-results+json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}?query=PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX dct: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?product ?label ?description ?domain ?domainLabel ?status\nWHERE {\n  ?product a dprod:DataProduct ;\n           rdfs:label ?label ;\n           dprod:dataProductOwner <https://data.example.com/agents/customer-data-team> ;\n           dprod:lifecycleStatus ?status .\n\n  OPTIONAL { ?product dct:description ?description }\n  OPTIONAL { ?product dprod:domain ?domain . ?domain rdfs:label ?domainLabel }\n}\nORDER BY ?label",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX dct: <http://purl.org/dc/terms/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?product ?label ?description ?domain ?domainLabel ?status\nWHERE {\n  ?product a dprod:DataProduct ;\n           rdfs:label ?label ;\n           dprod:dataProductOwner <https://data.example.com/agents/customer-data-team> ;\n           dprod:lifecycleStatus ?status .\n\n  OPTIONAL { ?product dct:description ?description }\n  OPTIONAL { ?product dprod:domain ?domain . ?domain rdfs:label ?domainLabel }\n}\nORDER BY ?label"
+                }
+              ]
+            },
+            "description": "Find all data products owned by a specific team or agent.\n\n**Parameter**: Replace the owner URI with your target owner."
+          }
+        }
+      ],
+      "description": "Filter products by domain, lifecycle status, or owner."
+    },
+    {
+      "name": "Lineage Queries",
+      "item": [
+        {
+          "name": "Trace Upstream Dependencies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/sparql-results+json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}?query=PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?upstream ?upstreamLabel ?upstreamStatus ?viaPort ?portLabel\nWHERE {\n  BIND(<https://data.example.com/products/sales-analytics> AS ?product)\n\n  ?product dprod:inputPort ?viaPort .\n\n  ?upstream a dprod:DataProduct ;\n            rdfs:label ?upstreamLabel ;\n            dprod:outputPort ?viaPort ;\n            dprod:lifecycleStatus ?upstreamStatus .\n\n  OPTIONAL { ?viaPort rdfs:label ?portLabel }\n}\nORDER BY ?upstreamLabel",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?upstream ?upstreamLabel ?upstreamStatus ?viaPort ?portLabel\nWHERE {\n  BIND(<https://data.example.com/products/sales-analytics> AS ?product)\n\n  ?product dprod:inputPort ?viaPort .\n\n  ?upstream a dprod:DataProduct ;\n            rdfs:label ?upstreamLabel ;\n            dprod:outputPort ?viaPort ;\n            dprod:lifecycleStatus ?upstreamStatus .\n\n  OPTIONAL { ?viaPort rdfs:label ?portLabel }\n}\nORDER BY ?upstreamLabel"
+                }
+              ]
+            },
+            "description": "Find data sources (upstream dependencies) for a product.\n\n**Parameter**: Replace the product URI to trace its sources."
+          }
+        },
+        {
+          "name": "Trace Downstream Consumers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/sparql-results+json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}?query=PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?downstream ?downstreamLabel ?downstreamStatus ?viaPort ?portLabel\nWHERE {\n  BIND(<https://data.example.com/products/customer-360> AS ?product)\n\n  ?product dprod:outputPort ?viaPort .\n\n  ?downstream a dprod:DataProduct ;\n              rdfs:label ?downstreamLabel ;\n              dprod:inputPort ?viaPort ;\n              dprod:lifecycleStatus ?downstreamStatus .\n\n  OPTIONAL { ?viaPort rdfs:label ?portLabel }\n}\nORDER BY ?downstreamLabel",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?downstream ?downstreamLabel ?downstreamStatus ?viaPort ?portLabel\nWHERE {\n  BIND(<https://data.example.com/products/customer-360> AS ?product)\n\n  ?product dprod:outputPort ?viaPort .\n\n  ?downstream a dprod:DataProduct ;\n              rdfs:label ?downstreamLabel ;\n              dprod:inputPort ?viaPort ;\n              dprod:lifecycleStatus ?downstreamStatus .\n\n  OPTIONAL { ?viaPort rdfs:label ?portLabel }\n}\nORDER BY ?downstreamLabel"
+                }
+              ]
+            },
+            "description": "Find consumers (downstream dependencies) of a product. Useful for impact analysis.\n\n**Parameter**: Replace the product URI to find its consumers."
+          }
+        }
+      ],
+      "description": "Data lineage queries for tracking dependencies and impact analysis."
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Products by Domain",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/sparql-results+json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}?query=PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?domain ?domainLabel (COUNT(?product) AS ?productCount)\nWHERE {\n  ?product a dprod:DataProduct ;\n           dprod:domain ?domain .\n\n  ?domain rdfs:label ?domainLabel .\n}\nGROUP BY ?domain ?domainLabel\nORDER BY DESC(?productCount)",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?domain ?domainLabel (COUNT(?product) AS ?productCount)\nWHERE {\n  ?product a dprod:DataProduct ;\n           dprod:domain ?domain .\n\n  ?domain rdfs:label ?domainLabel .\n}\nGROUP BY ?domain ?domainLabel\nORDER BY DESC(?productCount)"
+                }
+              ]
+            },
+            "description": "Count data products grouped by business domain."
+          }
+        },
+        {
+          "name": "Products by Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/sparql-results+json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}?query=PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?status ?statusLabel (COUNT(?product) AS ?productCount)\nWHERE {\n  ?product a dprod:DataProduct ;\n           dprod:lifecycleStatus ?status .\n\n  OPTIONAL { ?status rdfs:label ?statusLabel }\n}\nGROUP BY ?status ?statusLabel\nORDER BY DESC(?productCount)",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?status ?statusLabel (COUNT(?product) AS ?productCount)\nWHERE {\n  ?product a dprod:DataProduct ;\n           dprod:lifecycleStatus ?status .\n\n  OPTIONAL { ?status rdfs:label ?statusLabel }\n}\nGROUP BY ?status ?statusLabel\nORDER BY DESC(?productCount)"
+                }
+              ]
+            },
+            "description": "Count data products grouped by lifecycle status."
+          }
+        }
+      ],
+      "description": "Aggregate statistics and analytics queries."
+    },
+    {
+      "name": "Admin Queries",
+      "item": [
+        {
+          "name": "Products Missing Owners",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/sparql-results+json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}?query=PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?product ?label ?status ?domain\nWHERE {\n  ?product a dprod:DataProduct ;\n           rdfs:label ?label ;\n           dprod:lifecycleStatus ?status .\n\n  OPTIONAL { ?product dprod:domain ?domain }\n\n  FILTER NOT EXISTS {\n    ?product dprod:dataProductOwner ?owner .\n  }\n}\nORDER BY ?label",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?product ?label ?status ?domain\nWHERE {\n  ?product a dprod:DataProduct ;\n           rdfs:label ?label ;\n           dprod:lifecycleStatus ?status .\n\n  OPTIONAL { ?product dprod:domain ?domain }\n\n  FILTER NOT EXISTS {\n    ?product dprod:dataProductOwner ?owner .\n  }\n}\nORDER BY ?label"
+                }
+              ]
+            },
+            "description": "Find data products without an assigned owner. Governance audit query."
+          }
+        },
+        {
+          "name": "Orphaned Datasets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/sparql-results+json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}?query=PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX dcat: <http://www.w3.org/ns/dcat#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?dataset ?label\nWHERE {\n  ?dataset a dcat:Dataset .\n  OPTIONAL { ?dataset rdfs:label ?label }\n\n  FILTER NOT EXISTS {\n    ?port dcat:servesDataset ?dataset .\n  }\n}\nORDER BY ?label",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "PREFIX dprod: <https://ekgf.github.io/dprod/>\nPREFIX dcat: <http://www.w3.org/ns/dcat#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?dataset ?label\nWHERE {\n  ?dataset a dcat:Dataset .\n  OPTIONAL { ?dataset rdfs:label ?label }\n\n  FILTER NOT EXISTS {\n    ?port dcat:servesDataset ?dataset .\n  }\n}\nORDER BY ?label"
+                }
+              ]
+            },
+            "description": "Find datasets not connected to any data product port."
+          }
+        }
+      ],
+      "description": "Administrative and governance queries for data quality."
+    },
+    {
+      "name": "Data Management",
+      "item": [
+        {
+          "name": "Load Data Product (TTL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/turtle"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "@prefix dprod: <https://ekgf.github.io/dprod/> .\n@prefix dcat: <http://www.w3.org/ns/dcat#> .\n@prefix dct: <http://purl.org/dc/terms/> .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n\n<https://data.example.com/products/my-product>\n    a dprod:DataProduct ;\n    rdfs:label \"My Data Product\" ;\n    dct:description \"Description of my data product\" ;\n    dprod:dataProductOwner <https://data.example.com/agents/my-team> ;\n    dprod:lifecycleStatus <https://data.example.com/lifecycle/Design> ;\n    dprod:domain <https://data.example.com/domains/analytics> ;\n    dct:created \"2025-01-01\"^^xsd:date .\n"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}/statements?context=<urn:data:products>",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}", "statements"],
+              "query": [
+                {
+                  "key": "context",
+                  "value": "<urn:data:products>"
+                }
+              ]
+            },
+            "description": "Load a new data product definition into the catalog.\n\nUses the Graph Store Protocol to add statements to the `urn:data:products` named graph."
+          }
+        },
+        {
+          "name": "Delete Data Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/sparql-update"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "PREFIX dprod: <https://ekgf.github.io/dprod/>\n\nDELETE WHERE {\n  GRAPH <urn:data:products> {\n    <https://data.example.com/products/my-product> ?p ?o .\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/repositories/{{repository}}/statements",
+              "host": ["{{baseUrl}}"],
+              "path": ["repositories", "{{repository}}", "statements"]
+            },
+            "description": "Delete a data product from the catalog.\n\n**Parameter**: Replace the product URI with the one to delete."
+          }
+        }
+      ],
+      "description": "CRUD operations for managing data products."
+    }
+  ]
+}
