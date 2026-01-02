@@ -1,6 +1,7 @@
 import type {
   DataProduct,
   DataProductCreate,
+  DataProductDetail,
   DataProductSummary,
   Domain,
   HealthStatus,
@@ -55,6 +56,10 @@ export const productsApi = {
 
   get: (uri: string): Promise<DataProduct> => {
     return fetchJSON(`/api/v1/products/${encodeURIComponent(uri)}`);
+  },
+
+  getDetail: (uri: string): Promise<DataProductDetail> => {
+    return fetchJSON(`/api/v1/products/${encodeURIComponent(uri)}/detail`);
   },
 
   search: (query: string): Promise<DataProductSummary[]> => {

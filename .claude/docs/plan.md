@@ -714,20 +714,204 @@ dprod-graphdb/
 
 ---
 
+## Phase 9: Data Product Detail View (In Progress)
+
+**Goal:** Add comprehensive product detail view displaying full nested metadata hierarchy when clicking on a product card
+
+### 9.1 Overview
+
+Display the full DPROD data model hierarchy when users click on a product:
+- Product metadata (title, description, owner, domain, lifecycle status)
+- Output Ports (DataService) with endpoint URLs and protocols
+- Datasets served by each port
+- Distributions with format/mediaType information
+- conformsTo schema references (when available)
+
+### 9.2 Current State
+
+**Backend:**
+- Full RDF data exists with nested structure: Product → OutputPort → Dataset → Distribution
+- API only returns port URIs (not full details)
+- `get_product_rdf()` method exists but returns Turtle RDF
+
+**Frontend:**
+- No `/catalog/:productUri` route exists
+- ProductCard only links to lineage view
+- No product detail page/modal
+
+### 9.3 Backend Implementation
+
+**File:** `src/dprod/api/schemas/models.py`
+
+Add nested Pydantic models:
+```python
+class DistributionDetail(BaseModel):
+    uri: str
+    label: str | None
+    format_uri: str | None
+    media_type: str | None
+
+class DatasetDetail(BaseModel):
+    uri: str
+    label: str | None
+    description: str | None
+    conforms_to: str | None
+    distributions: list[DistributionDetail]
+
+class DataServiceDetail(BaseModel):
+    uri: str
+    label: str | None
+    description: str | None
+    endpoint_url: str | None
+    protocol: str | None
+    protocol_label: str | None
+    serves_dataset: DatasetDetail | None
+
+class DataProductDetailResponse(BaseModel):
+    uri: str
+    label: str
+    description: str | None
+    owner_uri: str | None
+    owner_label: str | None
+    domain_uri: str | None
+    domain_label: str | None
+    status_uri: str | None
+    status_label: str | None
+    created: date | None
+    modified: date | None
+    output_ports: list[DataServiceDetail]
+    input_ports: list[DataServiceDetail]
+```
+
+**File:** `src/dprod/client.py`
+
+Add `get_product_detail(uri)` method:
+1. Execute SELECT query joining product → port → dataset → distribution
+2. Build nested dictionary from flat results
+3. Return structure matching `DataProductDetailResponse`
+
+**File:** `src/dprod/api/routes/products.py`
+
+Add endpoint:
+```python
+@router.get("/{product_uri:path}/detail", response_model=DataProductDetailResponse)
+async def get_product_detail(product_uri: str) -> DataProductDetailResponse:
+```
+
+### 9.4 Frontend Implementation
+
+**File:** `frontend/src/api/types.ts`
+
+Add TypeScript interfaces:
+- `Distribution`
+- `Dataset`
+- `DataServiceDetail`
+- `DataProductDetail`
+
+**File:** `frontend/src/api/client.ts`
+
+Add method:
+```typescript
+getDetail: (uri: string): Promise<DataProductDetail> => {
+  return fetchJSON(`/api/v1/products/${encodeURIComponent(uri)}/detail`);
+}
+```
+
+**File:** `frontend/src/App.tsx`
+
+Add route:
+```tsx
+<Route path="catalog/:productUri" element={<ProductDetailPage />} />
+```
+
+**File:** `frontend/src/pages/ProductDetailPage.tsx` (new)
+
+Create page with dark theme matching Dashboard:
+- Header: Status badge, title, owner, dates
+- Description section
+- Output Ports section with nested cards
+- Input Ports section
+- Action buttons (View Lineage, Copy URI)
+
+**File:** `frontend/src/pages/CatalogPage.tsx`
+
+Update ProductCard/ProductRow to link to detail page instead of lineage.
+
+### 9.5 UI Design
+
+Follow the Dashboard's "Data Mesh Command Center" dark theme:
+- Background: `bg-slate-950`
+- Cards: `bg-slate-900/50 backdrop-blur border-slate-800`
+- Accents: Cyan/emerald for healthy, amber for warnings
+- Monospace typography for technical values
+- Staggered entrance animations
+
+Layout:
+```
+┌─────────────────────────────────────────────────────────┐
+│ Breadcrumb: Catalog > Customer 360                      │
+├─────────────────────────────────────────────────────────┤
+│ [Status: Consume]                    [View Lineage] btn │
+│ Customer 360                                            │
+│ Owner: Customer Data Team  •  Domain: Customer Analytics│
+│ Created: 2024-01-15  •  Modified: 2024-12-01           │
+├─────────────────────────────────────────────────────────┤
+│ Description                                             │
+│ Unified customer view combining CRM, transactions...    │
+├─────────────────────────────────────────────────────────┤
+│ OUTPUT PORTS                                    [1]     │
+│ ┌─────────────────────────────────────────────────────┐ │
+│ │ Customer 360 REST API                      [REST]   │ │
+│ │ Endpoint: https://api.example.com/v1/customers      │ │
+│ │                                                     │ │
+│ │ DATASET: Customer Master Dataset                    │ │
+│ │ ┌─────────────────────────────────────────────────┐ │ │
+│ │ │ Golden record of all customers...               │ │ │
+│ │ │ Distributions: [JSON] [Parquet]                 │ │ │
+│ │ └─────────────────────────────────────────────────┘ │ │
+│ └─────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────┤
+│ INPUT PORTS                                     [0]     │
+│ No input ports - this is a source data product          │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 9.6 Implementation Tasks
+
+| Task | Deliverable | Owner | Status |
+|------|-------------|-------|--------|
+| Add nested Pydantic models | `src/dprod/api/schemas/models.py` | Developer | ☐ Not Started |
+| Add `get_product_detail()` client method | `src/dprod/client.py` | Developer | ☐ Not Started |
+| Add `/detail` API endpoint | `src/dprod/api/routes/products.py` | Developer | ☐ Not Started |
+| Add TypeScript interfaces | `frontend/src/api/types.ts` | Developer | ☐ Not Started |
+| Add `getDetail()` API client method | `frontend/src/api/client.ts` | Developer | ☐ Not Started |
+| Add route for product detail | `frontend/src/App.tsx` | Developer | ☐ Not Started |
+| Create ProductDetailPage | `frontend/src/pages/ProductDetailPage.tsx` | Developer | ☐ Not Started |
+| Update catalog navigation | `frontend/src/pages/CatalogPage.tsx` | Developer | ☐ Not Started |
+
+### Acceptance Criteria — Phase 9
+
+- [ ] Clicking a product card navigates to `/catalog/{encodedUri}`
+- [ ] Detail page shows all product metadata
+- [ ] Output ports display with nested dataset/distribution info
+- [ ] Input ports section shows dependencies (or empty state)
+- [ ] "View Lineage" button navigates to lineage page
+- [ ] Dark theme matches Dashboard aesthetic
+- [ ] Loading and error states handled
+- [ ] URL-encoded URIs work correctly
+
+---
+
 ## Next Actions
 
-1. **Immediate:** Review Phase 8 front-end interface design
-2. **This Week:** Add FastAPI dependencies to `pyproject.toml`
-3. **Implementation Priority:**
-   - Create FastAPI application with REST endpoints
-   - Implement WebSocket chat endpoint with MCP server integration
-   - Setup React project with Vite + TypeScript + TailwindCSS
-   - Build catalog browse page with search/filter
-   - Implement lineage visualization with React Flow
-   - Create quality dashboard with metrics
-   - Build product registration wizard
-   - Integrate collapsible chat panel
-4. **Defer:** Advanced features (bulk operations, export/import, SPARQL playground)
+1. **Immediate:** Implement Phase 9 Data Product Detail View
+2. **Implementation Priority:**
+   - Backend: Add nested Pydantic models and `/detail` endpoint
+   - Backend: Add `get_product_detail()` client method with SPARQL query
+   - Frontend: Add TypeScript types and API client method
+   - Frontend: Create ProductDetailPage with dark theme
+   - Frontend: Update catalog navigation to detail page
+3. **Defer:** Advanced features (bulk operations, export/import, SPARQL playground)
 
 ---
 

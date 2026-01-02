@@ -2,23 +2,37 @@
 
 Implementation of the [Data Product Ontology (DPROD)](https://ekgf.github.io/dprod/) specification using Ontotext GraphDB. DPROD extends W3C DCAT to describe Data Products in decentralized data architectures.
 
-## Quick Start
+Features a full-stack application with:
+- **GraphDB Backend** - RDF triple store with SHACL validation
+- **Python REST API** - FastAPI service with SPARQL client
+- **React Frontend** - Data product catalog with dark-themed dashboard
+
+## :rocket: Quick Start
 
 ```bash
-# Full setup with sample data
+# Start GraphDB and load sample data
 make setup-full
 
-# Access GraphDB Workbench
-open http://localhost:7200
+# Start the API server
+uv run python -m uvicorn dprod.api:app --reload --port 8000
+
+# Start the frontend (in another terminal)
+cd frontend && npm run dev
+
+# Access the application
+open http://localhost:5173      # Frontend
+open http://localhost:8000/docs # API Documentation
+open http://localhost:7200      # GraphDB Workbench
 ```
 
-## Requirements
+## :clipboard: Requirements
 
 - Docker & Docker Compose
-- curl
-- make
+- Python 3.11+ with [uv](https://docs.astral.sh/uv/)
+- Node.js 18+
+- curl, make
 
-## Make Targets
+## :gear: Make Targets
 
 ### Core Operations
 
@@ -65,7 +79,7 @@ open http://localhost:7200
 | `make shell` | Open shell in container |
 | `make help` | Show all available targets |
 
-## Query Library
+## :mag: Query Library
 
 The `queries/` directory contains ready-to-use SPARQL queries:
 
@@ -116,7 +130,75 @@ make query FILE=queries/stats-by-domain.rq FORMAT=json
 make queries-list
 ```
 
-## Project Structure
+## :electric_plug: REST API
+
+The Python FastAPI service exposes DPROD data via REST endpoints.
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/health` | GET | Health check with GraphDB status |
+| `/api/v1/products` | GET | List all data products |
+| `/api/v1/products` | POST | Create a new data product |
+| `/api/v1/products/{uri}` | GET | Get product summary |
+| `/api/v1/products/{uri}/detail` | GET | Get full product with nested ports/datasets |
+| `/api/v1/products/search?q=` | GET | Search products by keyword |
+| `/api/v1/products/domains/` | GET | List domains with product counts |
+| `/api/v1/lineage/{uri}` | GET | Get lineage graph for a product |
+| `/api/v1/quality` | GET | Get quality report across all products |
+
+### Development
+
+```bash
+# Install dependencies
+uv sync
+
+# Run API server
+uv run python -m uvicorn dprod.api:app --reload --port 8000
+
+# Run tests
+uv run pytest
+
+# Lint and format
+uv run ruff check .
+uv run ruff format .
+```
+
+## :desktop_computer: Frontend
+
+React application with TanStack Query, React Router, and Tailwind CSS.
+
+### Pages
+
+| Route | Description |
+|-------|-------------|
+| `/` | Dashboard - Command center with health status and metrics |
+| `/catalog` | Catalog - Browse and search data products |
+| `/catalog/:uri` | Product Detail - Full metadata with ports, datasets, distributions |
+| `/lineage` | Lineage - Interactive dependency graph visualization |
+| `/quality` | Quality - Data quality issues and reports |
+| `/register` | Register - Create new data products |
+
+### Development
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Run dev server
+npm run dev
+
+# Build for production
+npm run build
+
+# Type check
+npx tsc --noEmit
+```
+
+## :file_folder: Project Structure
 
 ```
 ├── config/
@@ -149,15 +231,26 @@ make queries-list
 │   ├── stats-by-*.rq            # Analytics queries
 │   ├── validate-*.rq            # Validation queries
 │   └── *.rq                     # Admin queries
+├── src/dprod/                    # Python API package
+│   ├── api/                     # FastAPI application
+│   │   ├── routes/              # API route handlers
+│   │   └── schemas/             # Pydantic models
+│   └── client.py                # GraphDB SPARQL client
+├── frontend/                     # React application
+│   ├── src/
+│   │   ├── api/                 # API client and types
+│   │   ├── components/          # Reusable UI components
+│   │   └── pages/               # Route page components
+│   └── package.json
 ├── tests/                        # Validation test suite
 │   ├── valid/                   # Valid examples (should pass)
 │   └── invalid/                 # Invalid examples (should fail)
 ├── docker-compose.yml
 ├── Makefile
-└── .env.example
+└── pyproject.toml
 ```
 
-## Named Graphs
+## :label: Named Graphs
 
 | Graph URI | Content |
 |-----------|---------|
@@ -171,7 +264,7 @@ make queries-list
 | `urn:vocab:security` | Security schema types |
 | `urn:data:products` | Data product instances |
 
-## Sample Data Products
+## :package: Sample Data Products
 
 | Product | Domain | Status | Description |
 |---------|--------|--------|-------------|
@@ -181,7 +274,7 @@ make queries-list
 | Finance Reporting | Finance | Consume | Financial statements |
 | Marketing Campaigns | Marketing | Consume | Campaign performance |
 
-## SPARQL Examples
+## :pencil: SPARQL Examples
 
 ### List all data products
 
@@ -228,7 +321,7 @@ WHERE {
 }
 ```
 
-## Configuration
+## :wrench: Configuration
 
 Copy `.env.example` to `.env` and customize:
 
@@ -238,9 +331,16 @@ GRAPHDB_ENABLE_AUTH=false
 BASE_NAMESPACE=https://data.vcondition.com/
 ```
 
-## References
+## :books: References
 
+### Ontologies & Standards
 - [DPROD Specification](https://ekgf.github.io/dprod/)
 - [W3C DCAT v3](https://www.w3.org/TR/vocab-dcat-3/)
-- [GraphDB Documentation](https://graphdb.ontotext.com/documentation/)
 - [SHACL Specification](https://www.w3.org/TR/shacl/)
+
+### Technologies
+- [GraphDB Documentation](https://graphdb.ontotext.com/documentation/)
+- [FastAPI](https://fastapi.tiangolo.com/)
+- [TanStack Query](https://tanstack.com/query/)
+- [React Router](https://reactrouter.com/)
+- [Tailwind CSS](https://tailwindcss.com/)

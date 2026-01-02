@@ -2,8 +2,12 @@
 
 from .models import (
     DataProductCreate,
+    DataProductDetailResponse,
     DataProductResponse,
     DataProductSummaryResponse,
+    DataServiceDetail,
+    DatasetDetail,
+    DistributionDetail,
     DomainResponse,
     HealthResponse,
     LineageEdgeResponse,
@@ -17,8 +21,12 @@ from .models import (
 
 __all__ = [
     "DataProductCreate",
+    "DataProductDetailResponse",
     "DataProductResponse",
     "DataProductSummaryResponse",
+    "DataServiceDetail",
+    "DatasetDetail",
+    "DistributionDetail",
     "DomainResponse",
     "HealthResponse",
     "LineageEdgeResponse",

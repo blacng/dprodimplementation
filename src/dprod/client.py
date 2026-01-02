@@ -279,6 +279,218 @@ WHERE {{
 """
         return self._construct(query)
 
+    def get_product_detail(self, uri: str) -> dict:
+        """Get detailed product info with nested port, dataset, and distribution data.
+
+        Args:
+            uri: The full URI of the data product
+
+        Returns:
+            Dictionary with full nested structure suitable for DataProductDetailResponse
+
+        Raises:
+            NotFoundError: If the product doesn't exist
+        """
+        # Query for product with all nested relationships
+        query = f"""{PREFIXES}
+SELECT
+  ?label ?description ?owner ?ownerLabel ?domain ?domainLabel
+  ?status ?statusLabel ?created ?modified
+  ?outputPort ?outputPortLabel ?outputPortDesc ?endpointURL ?endpointDesc ?protocol ?protocolLabel
+  ?dataset ?datasetLabel ?datasetDesc ?conformsTo
+  ?distribution ?distributionLabel ?format ?mediaType
+WHERE {{
+  <{uri}> a dprod:DataProduct ;
+          rdfs:label ?label .
+
+  OPTIONAL {{ <{uri}> dct:description ?description }}
+  OPTIONAL {{ <{uri}> dprod:dataProductOwner ?owner . OPTIONAL {{ ?owner rdfs:label ?ownerLabel }} }}
+  OPTIONAL {{ <{uri}> dprod:domain ?domain . OPTIONAL {{ ?domain rdfs:label ?domainLabel }} }}
+  OPTIONAL {{ <{uri}> dprod:lifecycleStatus ?status . OPTIONAL {{ ?status rdfs:label ?statusLabel }} }}
+  OPTIONAL {{ <{uri}> dct:created ?created }}
+  OPTIONAL {{ <{uri}> dct:modified ?modified }}
+
+  OPTIONAL {{
+    <{uri}> dprod:outputPort ?outputPort .
+    ?outputPort a dcat:DataService .
+    OPTIONAL {{ ?outputPort rdfs:label ?outputPortLabel }}
+    OPTIONAL {{ ?outputPort dct:description ?outputPortDesc }}
+    OPTIONAL {{ ?outputPort dcat:endpointURL ?endpointURL }}
+    OPTIONAL {{ ?outputPort dcat:endpointDescription ?endpointDesc }}
+    OPTIONAL {{ ?outputPort dprod:protocol ?protocol . OPTIONAL {{ ?protocol rdfs:label ?protocolLabel }} }}
+
+    OPTIONAL {{
+      ?outputPort dcat:servesDataset ?dataset .
+      OPTIONAL {{ ?dataset rdfs:label ?datasetLabel }}
+      OPTIONAL {{ ?dataset dct:description ?datasetDesc }}
+      OPTIONAL {{ ?dataset dct:conformsTo ?conformsTo }}
+
+      OPTIONAL {{
+        ?dataset dcat:distribution ?distribution .
+        OPTIONAL {{ ?distribution rdfs:label ?distributionLabel }}
+        OPTIONAL {{ ?distribution dct:format ?format }}
+        OPTIONAL {{ ?distribution dcat:mediaType ?mediaType }}
+      }}
+    }}
+  }}
+}}
+"""
+        results = self._query(query)
+        bindings = results.get("results", {}).get("bindings", [])
+
+        if not bindings:
+            raise NotFoundError(f"Product not found: {uri}")
+
+        # Build the base product structure from first binding
+        first = bindings[0]
+        product = {
+            "uri": uri,
+            "label": self._get_value(first, "label"),
+            "description": self._get_value(first, "description"),
+            "owner_uri": self._get_value(first, "owner"),
+            "owner_label": self._get_value(first, "ownerLabel"),
+            "domain_uri": self._get_value(first, "domain"),
+            "domain_label": self._get_value(first, "domainLabel"),
+            "status_uri": self._get_value(first, "status"),
+            "status_label": self._get_value(first, "statusLabel"),
+            "created": self._parse_date(self._get_value(first, "created")),
+            "modified": self._parse_date(self._get_value(first, "modified")),
+            "output_ports": [],
+            "input_ports": [],
+        }
+
+        # Build nested structure for output ports
+        ports_map: dict[str, dict] = {}
+        datasets_map: dict[str, dict] = {}
+
+        for binding in bindings:
+            port_uri = self._get_value(binding, "outputPort")
+            if not port_uri:
+                continue
+
+            # Initialize port if not seen
+            if port_uri not in ports_map:
+                ports_map[port_uri] = {
+                    "uri": port_uri,
+                    "label": self._get_value(binding, "outputPortLabel"),
+                    "description": self._get_value(binding, "outputPortDesc"),
+                    "endpoint_url": self._get_value(binding, "endpointURL"),
+                    "endpoint_description": self._get_value(binding, "endpointDesc"),
+                    "protocol": self._get_value(binding, "protocol"),
+                    "protocol_label": self._get_value(binding, "protocolLabel"),
+                    "serves_dataset": None,
+                }
+
+            # Handle dataset
+            dataset_uri = self._get_value(binding, "dataset")
+            if dataset_uri:
+                if dataset_uri not in datasets_map:
+                    datasets_map[dataset_uri] = {
+                        "uri": dataset_uri,
+                        "label": self._get_value(binding, "datasetLabel"),
+                        "description": self._get_value(binding, "datasetDesc"),
+                        "conforms_to": self._get_value(binding, "conformsTo"),
+                        "distributions": [],
+                    }
+
+                # Handle distribution
+                dist_uri = self._get_value(binding, "distribution")
+                if dist_uri:
+                    # Check if distribution already added
+                    existing_dists = [d["uri"] for d in datasets_map[dataset_uri]["distributions"]]
+                    if dist_uri not in existing_dists:
+                        datasets_map[dataset_uri]["distributions"].append({
+                            "uri": dist_uri,
+                            "label": self._get_value(binding, "distributionLabel"),
+                            "format_uri": self._get_value(binding, "format"),
+                            "media_type": self._get_value(binding, "mediaType"),
+                        })
+
+                # Link dataset to port
+                ports_map[port_uri]["serves_dataset"] = datasets_map[dataset_uri]
+
+        product["output_ports"] = list(ports_map.values())
+
+        # Query input ports separately (they reference other products' output ports)
+        input_query = f"""{PREFIXES}
+SELECT ?inputPort ?inputPortLabel ?inputPortDesc ?endpointURL ?endpointDesc ?protocol ?protocolLabel
+       ?dataset ?datasetLabel ?datasetDesc ?conformsTo
+       ?distribution ?distributionLabel ?format ?mediaType
+WHERE {{
+  <{uri}> dprod:inputPort ?inputPort .
+  ?inputPort a dcat:DataService .
+  OPTIONAL {{ ?inputPort rdfs:label ?inputPortLabel }}
+  OPTIONAL {{ ?inputPort dct:description ?inputPortDesc }}
+  OPTIONAL {{ ?inputPort dcat:endpointURL ?endpointURL }}
+  OPTIONAL {{ ?inputPort dcat:endpointDescription ?endpointDesc }}
+  OPTIONAL {{ ?inputPort dprod:protocol ?protocol . OPTIONAL {{ ?protocol rdfs:label ?protocolLabel }} }}
+
+  OPTIONAL {{
+    ?inputPort dcat:servesDataset ?dataset .
+    OPTIONAL {{ ?dataset rdfs:label ?datasetLabel }}
+    OPTIONAL {{ ?dataset dct:description ?datasetDesc }}
+    OPTIONAL {{ ?dataset dct:conformsTo ?conformsTo }}
+
+    OPTIONAL {{
+      ?dataset dcat:distribution ?distribution .
+      OPTIONAL {{ ?distribution rdfs:label ?distributionLabel }}
+      OPTIONAL {{ ?distribution dct:format ?format }}
+      OPTIONAL {{ ?distribution dcat:mediaType ?mediaType }}
+    }}
+  }}
+}}
+"""
+        input_results = self._query(input_query)
+        input_bindings = input_results.get("results", {}).get("bindings", [])
+
+        input_ports_map: dict[str, dict] = {}
+        input_datasets_map: dict[str, dict] = {}
+
+        for binding in input_bindings:
+            port_uri = self._get_value(binding, "inputPort")
+            if not port_uri:
+                continue
+
+            if port_uri not in input_ports_map:
+                input_ports_map[port_uri] = {
+                    "uri": port_uri,
+                    "label": self._get_value(binding, "inputPortLabel"),
+                    "description": self._get_value(binding, "inputPortDesc"),
+                    "endpoint_url": self._get_value(binding, "endpointURL"),
+                    "endpoint_description": self._get_value(binding, "endpointDesc"),
+                    "protocol": self._get_value(binding, "protocol"),
+                    "protocol_label": self._get_value(binding, "protocolLabel"),
+                    "serves_dataset": None,
+                }
+
+            dataset_uri = self._get_value(binding, "dataset")
+            if dataset_uri:
+                if dataset_uri not in input_datasets_map:
+                    input_datasets_map[dataset_uri] = {
+                        "uri": dataset_uri,
+                        "label": self._get_value(binding, "datasetLabel"),
+                        "description": self._get_value(binding, "datasetDesc"),
+                        "conforms_to": self._get_value(binding, "conformsTo"),
+                        "distributions": [],
+                    }
+
+                dist_uri = self._get_value(binding, "distribution")
+                if dist_uri:
+                    existing_dists = [d["uri"] for d in input_datasets_map[dataset_uri]["distributions"]]
+                    if dist_uri not in existing_dists:
+                        input_datasets_map[dataset_uri]["distributions"].append({
+                            "uri": dist_uri,
+                            "label": self._get_value(binding, "distributionLabel"),
+                            "format_uri": self._get_value(binding, "format"),
+                            "media_type": self._get_value(binding, "mediaType"),
+                        })
+
+                input_ports_map[port_uri]["serves_dataset"] = input_datasets_map[dataset_uri]
+
+        product["input_ports"] = list(input_ports_map.values())
+
+        return product
+
     def search(self, term: str) -> list[SearchResult]:
         """Full-text search across product labels, titles, descriptions, and purposes.
 

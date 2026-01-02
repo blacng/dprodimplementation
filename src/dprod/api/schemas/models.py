@@ -67,6 +67,63 @@ class DataProductResponse(BaseModel):
     input_ports: list[str] = Field(default_factory=list, description="Input port URIs")
 
 
+# Nested detail models for comprehensive product view
+class DistributionDetail(BaseModel):
+    """Distribution details within a dataset."""
+
+    uri: str = Field(description="Distribution URI")
+    label: str | None = Field(default=None, description="Distribution label")
+    format_uri: str | None = Field(default=None, description="Format URI (IANA media type)")
+    media_type: str | None = Field(default=None, description="Media type string")
+
+
+class DatasetDetail(BaseModel):
+    """Dataset with nested distributions."""
+
+    uri: str = Field(description="Dataset URI")
+    label: str | None = Field(default=None, description="Dataset label")
+    description: str | None = Field(default=None, description="Dataset description")
+    conforms_to: str | None = Field(default=None, description="Schema/standard this dataset conforms to")
+    distributions: list[DistributionDetail] = Field(
+        default_factory=list, description="Available distributions"
+    )
+
+
+class DataServiceDetail(BaseModel):
+    """Data service (output/input port) with nested dataset and distributions."""
+
+    uri: str = Field(description="Service URI")
+    label: str | None = Field(default=None, description="Service label")
+    description: str | None = Field(default=None, description="Service description")
+    endpoint_url: str | None = Field(default=None, description="API endpoint URL")
+    endpoint_description: str | None = Field(default=None, description="OpenAPI/schema URL")
+    protocol: str | None = Field(default=None, description="Protocol URI")
+    protocol_label: str | None = Field(default=None, description="Protocol display name")
+    serves_dataset: DatasetDetail | None = Field(default=None, description="Dataset served by this service")
+
+
+class DataProductDetailResponse(BaseModel):
+    """Full data product with nested port, dataset, and distribution details."""
+
+    uri: str = Field(description="Product URI")
+    label: str = Field(description="Product label")
+    description: str | None = Field(default=None, description="Product description")
+    owner_uri: str | None = Field(default=None, description="Owner URI")
+    owner_label: str | None = Field(default=None, description="Owner display name")
+    domain_uri: str | None = Field(default=None, description="Domain URI")
+    domain_label: str | None = Field(default=None, description="Domain display name")
+    status_uri: str | None = Field(default=None, description="Lifecycle status URI")
+    status_label: str | None = Field(default=None, description="Lifecycle status display name")
+    created: date | None = Field(default=None, description="Creation date")
+    modified: date | None = Field(default=None, description="Last modified date")
+    output_ports: list[DataServiceDetail] = Field(
+        default_factory=list, description="Output ports with nested data"
+    )
+    input_ports: list[DataServiceDetail] = Field(
+        default_factory=list, description="Input ports (references to other product outputs)"
+    )
+
+
 class DataProductCreate(BaseModel):
     """Request body for creating a new data product."""
 

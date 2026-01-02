@@ -19,6 +19,49 @@ export interface DataProduct extends DataProductSummary {
   input_ports: string[];
 }
 
+// Nested detail models for comprehensive product view
+export interface DistributionDetail {
+  uri: string;
+  label?: string;
+  format_uri?: string;
+  media_type?: string;
+}
+
+export interface DatasetDetail {
+  uri: string;
+  label?: string;
+  description?: string;
+  conforms_to?: string;
+  distributions: DistributionDetail[];
+}
+
+export interface DataServiceDetail {
+  uri: string;
+  label?: string;
+  description?: string;
+  endpoint_url?: string;
+  endpoint_description?: string;
+  protocol?: string;
+  protocol_label?: string;
+  serves_dataset?: DatasetDetail;
+}
+
+export interface DataProductDetail {
+  uri: string;
+  label: string;
+  description?: string;
+  owner_uri?: string;
+  owner_label?: string;
+  domain_uri?: string;
+  domain_label?: string;
+  status_uri?: string;
+  status_label?: string;
+  created?: string;
+  modified?: string;
+  output_ports: DataServiceDetail[];
+  input_ports: DataServiceDetail[];
+}
+
 export interface DataProductCreate {
   uri?: string;
   label: string;

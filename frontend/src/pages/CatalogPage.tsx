@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Filter, Grid, List, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search, Filter, Grid, List, ArrowRight } from 'lucide-react';
 import { productsApi } from '../api/client';
 import type { DataProductSummary } from '../api/types';
 
@@ -145,9 +146,14 @@ function ProductCard({ product }: { product: DataProductSummary }) {
   const statusLabel = product.status_uri?.split(':').pop() || 'Unknown';
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+    <Link
+      to={`/catalog/${encodeURIComponent(product.uri)}`}
+      className="block bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md hover:border-primary-200 transition-all group"
+    >
       <div className="flex items-start justify-between mb-2">
-        <h3 className="font-semibold text-gray-900">{product.label}</h3>
+        <h3 className="font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
+          {product.label}
+        </h3>
         <span
           className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
             product.status_uri
@@ -175,14 +181,11 @@ function ProductCard({ product }: { product: DataProductSummary }) {
       </div>
 
       <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
-        <a
-          href={`/lineage?product=${encodeURIComponent(product.uri)}`}
-          className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center gap-1"
-        >
-          View Lineage <ExternalLink size={14} />
-        </a>
+        <span className="text-primary-600 group-hover:text-primary-700 text-sm font-medium flex items-center gap-1">
+          View Details <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -199,36 +202,41 @@ function ProductRow({ product }: { product: DataProductSummary }) {
   const statusLabel = product.status_uri?.split(':').pop() || 'Unknown';
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm transition-shadow flex items-center gap-4">
-      <div className="flex-1">
-        <h3 className="font-semibold text-gray-900">{product.label}</h3>
-        <p className="text-sm text-gray-600 line-clamp-1">
-          {product.description || 'No description'}
-        </p>
+    <Link
+      to={`/catalog/${encodeURIComponent(product.uri)}`}
+      className="block bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm hover:border-primary-200 transition-all group"
+    >
+      <div className="flex items-center gap-4">
+        <div className="flex-1">
+          <h3 className="font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
+            {product.label}
+          </h3>
+          <p className="text-sm text-gray-600 line-clamp-1">
+            {product.description || 'No description'}
+          </p>
+        </div>
+
+        <div className="text-sm text-gray-500 hidden md:block">
+          {product.domain_label || '-'}
+        </div>
+
+        <div className="text-sm text-gray-500 hidden lg:block">
+          {product.owner_label || '-'}
+        </div>
+
+        <span
+          className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+            product.status_uri
+          )}`}
+        >
+          {statusLabel}
+        </span>
+
+        <ArrowRight
+          size={18}
+          className="text-gray-400 group-hover:text-primary-600 group-hover:translate-x-1 transition-all"
+        />
       </div>
-
-      <div className="text-sm text-gray-500 hidden md:block">
-        {product.domain_label || '-'}
-      </div>
-
-      <div className="text-sm text-gray-500 hidden lg:block">
-        {product.owner_label || '-'}
-      </div>
-
-      <span
-        className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-          product.status_uri
-        )}`}
-      >
-        {statusLabel}
-      </span>
-
-      <a
-        href={`/lineage?product=${encodeURIComponent(product.uri)}`}
-        className="text-primary-600 hover:text-primary-700"
-      >
-        <ExternalLink size={18} />
-      </a>
-    </div>
+    </Link>
   );
 }
