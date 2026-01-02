@@ -656,3 +656,286 @@ async def check_quality(args: dict[str, Any]) -> dict[str, Any]:
             "content": [{"type": "text", "text": f"Unexpected error: {e}"}],
             "is_error": True,
         }
+
+
+# -------------------------------------------------------------------------
+# Product Registration
+# -------------------------------------------------------------------------
+
+# Default base URIs for generating product URIs
+_DEFAULT_PRODUCT_BASE = "https://data.example.com/products/"
+_DEFAULT_OWNER_BASE = "https://data.example.com/agents/"
+_DEFAULT_DOMAIN_BASE = "https://data.example.com/domains/"
+_DEFAULT_STATUS_BASE = "https://ekgf.github.io/dprod/data/lifecycle-status/"
+
+
+def _generate_product_uri(label: str, base: str = _DEFAULT_PRODUCT_BASE) -> str:
+    """Generate a URI from a product label."""
+    # Convert to lowercase, replace spaces with hyphens, remove special chars
+    slug = label.lower().replace(" ", "-")
+    slug = "".join(c for c in slug if c.isalnum() or c == "-")
+    return f"{base}{slug}"
+
+
+def _resolve_uri(value: str, base: str) -> str:
+    """Resolve a value to a full URI if it's not already one."""
+    if value.startswith("http://") or value.startswith("https://"):
+        return value
+    # Treat as a local name and combine with base
+    return f"{base}{value}"
+
+
+@tool(
+    "register_product",
+    """Register a new data product in the catalog.
+
+Use when:
+- User wants to add/create a new data product
+- User provides product metadata to catalog
+- User says "register", "add", or "create" a product
+
+Required fields:
+- label: Display name for the product (e.g., "Customer 360")
+- owner: Owner team/agent URI or name (e.g., "data-platform-team")
+- status: Lifecycle status (e.g., "Design", "Build", "Consume", "Retire")
+
+Optional fields:
+- description: Product description
+- domain: Business domain URI or name (e.g., "customer-analytics")
+- product_uri: Custom URI (auto-generated from label if not provided)
+
+The product is validated against SHACL shapes on commit.
+
+Returns: Success confirmation with product URI, or validation errors""",
+    {
+        "label": str,
+        "owner": str,
+        "status": str,
+        "description": str,
+        "domain": str,
+        "product_uri": str,
+    },
+)
+async def register_product(args: dict[str, Any]) -> dict[str, Any]:
+    """Register a new data product in the catalog.
+
+    Args:
+        args: Dictionary containing:
+            - label: Display name (required)
+            - owner: Owner URI or name (required)
+            - status: Lifecycle status (required)
+            - description: Product description (optional)
+            - domain: Domain URI or name (optional)
+            - product_uri: Custom URI (optional, auto-generated if not provided)
+
+    Returns:
+        Tool response with registration result
+    """
+    label = args.get("label")
+    owner = args.get("owner")
+    status = args.get("status")
+    description = args.get("description")
+    domain = args.get("domain")
+    product_uri = args.get("product_uri")
+
+    # Validate required fields
+    missing = []
+    if not label:
+        missing.append("label")
+    if not owner:
+        missing.append("owner")
+    if not status:
+        missing.append("status")
+
+    if missing:
+        return {
+            "content": [{"type": "text", "text": f"Error: Missing required fields: {', '.join(missing)}"}],
+            "is_error": True,
+        }
+
+    client = get_client()
+
+    try:
+        # Generate or validate URIs
+        if not product_uri:
+            product_uri = _generate_product_uri(label)
+
+        owner_uri = _resolve_uri(owner, _DEFAULT_OWNER_BASE)
+        status_uri = _resolve_uri(status, _DEFAULT_STATUS_BASE)
+        domain_uri = _resolve_uri(domain, _DEFAULT_DOMAIN_BASE) if domain else None
+
+        # Check if product already exists
+        try:
+            existing = client.get_product(product_uri)
+            return {
+                "content": [{"type": "text", "text": f"Error: Product already exists: {existing.label} ({product_uri})"}],
+                "is_error": True,
+            }
+        except NotFoundError:
+            pass  # Good, product doesn't exist
+
+        # Create the product
+        client.create_product(
+            uri=product_uri,
+            label=label,
+            owner_uri=owner_uri,
+            status_uri=status_uri,
+            description=description,
+            domain_uri=domain_uri,
+        )
+
+        # Build success message
+        lines = [
+            "✓ Product registered successfully!\n",
+            f"**URI:** {product_uri}",
+            f"**Label:** {label}",
+            f"**Owner:** {owner_uri}",
+            f"**Status:** {_extract_status_name(status_uri)}",
+        ]
+
+        if description:
+            lines.append(f"**Description:** {description[:100]}{'...' if len(description) > 100 else ''}")
+
+        if domain_uri:
+            lines.append(f"**Domain:** {domain_uri}")
+
+        lines.append("\nThe product is now available in the catalog.")
+
+        return {"content": [{"type": "text", "text": "\n".join(lines)}]}
+
+    except DPRODClientError as e:
+        return {
+            "content": [{"type": "text", "text": f"Registration failed: {e}"}],
+            "is_error": True,
+        }
+    except Exception as e:
+        return {
+            "content": [{"type": "text", "text": f"Unexpected error: {e}"}],
+            "is_error": True,
+        }
+
+
+# -------------------------------------------------------------------------
+# Raw SPARQL Execution
+# -------------------------------------------------------------------------
+
+
+def _format_sparql_results(results: dict[str, Any], limit: int = 50) -> str:
+    """Format SPARQL query results as readable text."""
+    bindings = results.get("results", {}).get("bindings", [])
+    variables = results.get("head", {}).get("vars", [])
+
+    if not bindings:
+        return "Query returned no results."
+
+    lines = [f"Query returned {len(bindings)} result(s):\n"]
+
+    # Build table header
+    if variables:
+        lines.append("| " + " | ".join(variables) + " |")
+        lines.append("| " + " | ".join(["---"] * len(variables)) + " |")
+
+    # Build table rows (limited)
+    for binding in bindings[:limit]:
+        row = []
+        for var in variables:
+            if var in binding:
+                value = binding[var].get("value", "")
+                # Truncate long values
+                if len(value) > 50:
+                    value = value[:47] + "..."
+                row.append(value)
+            else:
+                row.append("")
+        lines.append("| " + " | ".join(row) + " |")
+
+    if len(bindings) > limit:
+        lines.append(f"\n... and {len(bindings) - limit} more results (truncated)")
+
+    return "\n".join(lines)
+
+
+@tool(
+    "run_sparql",
+    """Execute a custom SPARQL query against the data catalog.
+
+Use when:
+- User needs advanced queries not covered by other tools
+- User provides a SPARQL query directly
+- User asks for custom aggregations or complex filters
+- User wants to explore the RDF graph structure
+
+IMPORTANT: This is for SELECT queries only. Use register_product for modifications.
+
+Common prefixes are automatically included:
+- dprod: <https://ekgf.github.io/dprod/>
+- dcat: <http://www.w3.org/ns/dcat#>
+- dct: <http://purl.org/dc/terms/>
+- rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+Returns: Query results formatted as a table""",
+    {
+        "query": str,
+        "include_prefixes": bool,
+    },
+)
+async def run_sparql(args: dict[str, Any]) -> dict[str, Any]:
+    """Execute a custom SPARQL query.
+
+    Args:
+        args: Dictionary containing:
+            - query: SPARQL SELECT query (required)
+            - include_prefixes: Whether to prepend common prefixes (default: True)
+
+    Returns:
+        Tool response with query results
+    """
+    query = args.get("query")
+    include_prefixes = args.get("include_prefixes", True)
+
+    if not query:
+        return {
+            "content": [{"type": "text", "text": "Error: query is required"}],
+            "is_error": True,
+        }
+
+    # Basic safety check - only allow SELECT queries
+    query_upper = query.strip().upper()
+    if not query_upper.startswith("SELECT") and not query_upper.startswith("PREFIX"):
+        # Check if it starts with PREFIX followed by SELECT
+        if "SELECT" not in query_upper:
+            return {
+                "content": [{"type": "text", "text": "Error: Only SELECT queries are allowed. Use register_product for modifications."}],
+                "is_error": True,
+            }
+
+    client = get_client()
+
+    try:
+        # Prepend prefixes if requested and not already present
+        if include_prefixes and not query.strip().upper().startswith("PREFIX"):
+            full_query = _PREFIXES + query
+        else:
+            full_query = query
+
+        results = client._query(full_query)
+        text = _format_sparql_results(results)
+        return {"content": [{"type": "text", "text": text}]}
+
+    except DPRODClientError as e:
+        error_msg = str(e)
+        # Try to provide helpful error messages
+        if "400" in error_msg:
+            return {
+                "content": [{"type": "text", "text": f"Query syntax error: {error_msg}\n\nCheck your SPARQL syntax."}],
+                "is_error": True,
+            }
+        return {
+            "content": [{"type": "text", "text": f"Query failed: {e}"}],
+            "is_error": True,
+        }
+    except Exception as e:
+        return {
+            "content": [{"type": "text", "text": f"Unexpected error: {e}"}],
+            "is_error": True,
+        }
