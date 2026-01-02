@@ -281,6 +281,11 @@ async def catalog_query(args: dict[str, Any]) -> dict[str, Any]:
         }
 
 
+# -------------------------------------------------------------------------
+# Lineage Formatting
+# -------------------------------------------------------------------------
+
+
 def _format_lineage_entry(entry: LineageEntry, direction: str) -> str:
     """Format a single lineage entry."""
     status = _extract_status_name(entry.status_uri) or "Unknown"
@@ -395,6 +400,252 @@ async def trace_lineage(args: dict[str, Any]) -> dict[str, Any]:
             "content": [{"type": "text", "text": f"Product not found: {e}"}],
             "is_error": True,
         }
+    except DPRODClientError as e:
+        return {
+            "content": [{"type": "text", "text": f"Catalog error: {e}"}],
+            "is_error": True,
+        }
+    except Exception as e:
+        return {
+            "content": [{"type": "text", "text": f"Unexpected error: {e}"}],
+            "is_error": True,
+        }
+
+
+# -------------------------------------------------------------------------
+# Quality Check Queries
+# -------------------------------------------------------------------------
+
+_PREFIXES = """
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+"""
+
+_QUALITY_CHECKS: dict[str, dict[str, str]] = {
+    "missing_owners": {
+        "name": "Missing Owners",
+        "description": "Data products without an assigned owner",
+        "severity": "high",
+        "query": _PREFIXES + """
+SELECT ?product ?label ?status ?domain
+WHERE {
+  ?product a dprod:DataProduct ;
+           rdfs:label ?label ;
+           dprod:lifecycleStatus ?status .
+  OPTIONAL { ?product dprod:domain ?domain }
+  FILTER NOT EXISTS {
+    ?product dprod:dataProductOwner ?owner .
+  }
+}
+ORDER BY ?label
+""",
+    },
+    "missing_descriptions": {
+        "name": "Missing Descriptions",
+        "description": "Data products without documentation",
+        "severity": "medium",
+        "query": _PREFIXES + """
+SELECT ?product ?label ?status ?owner
+WHERE {
+  ?product a dprod:DataProduct ;
+           rdfs:label ?label ;
+           dprod:lifecycleStatus ?status .
+  OPTIONAL { ?product dprod:dataProductOwner ?owner }
+  FILTER NOT EXISTS {
+    ?product dct:description ?desc .
+  }
+}
+ORDER BY ?label
+""",
+    },
+    "stale_products": {
+        "name": "Stale Products",
+        "description": "Products not modified in the last 90 days",
+        "severity": "low",
+        "query": _PREFIXES + """
+SELECT ?product ?label ?status ?modified ?owner
+WHERE {
+  ?product a dprod:DataProduct ;
+           rdfs:label ?label ;
+           dprod:lifecycleStatus ?status .
+  OPTIONAL { ?product dct:modified ?modified }
+  OPTIONAL { ?product dprod:dataProductOwner ?owner }
+  FILTER (
+    !BOUND(?modified) ||
+    ?modified < (NOW() - "P90D"^^xsd:duration)
+  )
+}
+ORDER BY ?modified ?label
+""",
+    },
+    "orphaned_datasets": {
+        "name": "Orphaned Datasets",
+        "description": "Datasets not linked to any data product",
+        "severity": "medium",
+        "query": _PREFIXES + """
+SELECT ?dataset ?datasetLabel ?datasetDescription
+WHERE {
+  ?dataset a dcat:Dataset .
+  OPTIONAL { ?dataset rdfs:label ?datasetLabel }
+  OPTIONAL { ?dataset dct:description ?datasetDescription }
+  FILTER NOT EXISTS {
+    ?port a dprod:OutputPort ;
+          dprod:datasetSource ?dataset .
+  }
+}
+ORDER BY ?datasetLabel
+""",
+    },
+    "incomplete_ports": {
+        "name": "Incomplete Port Definitions",
+        "description": "Products missing input or output ports",
+        "severity": "medium",
+        "query": _PREFIXES + """
+SELECT ?product ?label ?status ?hasInput ?hasOutput
+WHERE {
+  ?product a dprod:DataProduct ;
+           rdfs:label ?label ;
+           dprod:lifecycleStatus ?status .
+  BIND(EXISTS { ?product dprod:inputPort ?in } AS ?hasInput)
+  BIND(EXISTS { ?product dprod:outputPort ?out } AS ?hasOutput)
+  FILTER (!?hasInput || !?hasOutput)
+}
+ORDER BY ?label
+""",
+    },
+}
+
+
+def _run_quality_check(client: DPRODClient, check_id: str) -> dict[str, Any]:
+    """Run a single quality check and return results."""
+    check = _QUALITY_CHECKS[check_id]
+    results = client._query(check["query"])
+    bindings = results.get("results", {}).get("bindings", [])
+
+    return {
+        "check_id": check_id,
+        "name": check["name"],
+        "description": check["description"],
+        "severity": check["severity"],
+        "issue_count": len(bindings),
+        "issues": bindings,
+    }
+
+
+def _format_quality_report(results: list[dict[str, Any]]) -> str:
+    """Format quality check results as a readable report."""
+    lines = ["# Data Catalog Quality Report\n"]
+
+    total_issues = sum(r["issue_count"] for r in results)
+    high_severity = sum(r["issue_count"] for r in results if r["severity"] == "high")
+    medium_severity = sum(r["issue_count"] for r in results if r["severity"] == "medium")
+    low_severity = sum(r["issue_count"] for r in results if r["severity"] == "low")
+
+    lines.append("## Summary")
+    lines.append(f"- Total issues: {total_issues}")
+    lines.append(f"- High severity: {high_severity}")
+    lines.append(f"- Medium severity: {medium_severity}")
+    lines.append(f"- Low severity: {low_severity}")
+    lines.append("")
+
+    # Sort by severity (high first) then by issue count
+    severity_order = {"high": 0, "medium": 1, "low": 2}
+    sorted_results = sorted(results, key=lambda r: (severity_order[r["severity"]], -r["issue_count"]))
+
+    for result in sorted_results:
+        severity_icon = {"high": "🔴", "medium": "🟡", "low": "🟢"}[result["severity"]]
+        lines.append(f"## {severity_icon} {result['name']} ({result['issue_count']} issues)")
+        lines.append(f"*{result['description']}*\n")
+
+        if result["issue_count"] == 0:
+            lines.append("✓ No issues found\n")
+        else:
+            # Format up to 10 issues
+            issues = result["issues"][:10]
+            for issue in issues:
+                # Extract label or URI for display
+                if "label" in issue:
+                    name = issue["label"]["value"]
+                elif "datasetLabel" in issue:
+                    name = issue["datasetLabel"]["value"]
+                elif "product" in issue:
+                    name = issue["product"]["value"].rsplit("/", 1)[-1]
+                elif "dataset" in issue:
+                    name = issue["dataset"]["value"].rsplit("/", 1)[-1]
+                else:
+                    name = "Unknown"
+
+                # Add status if available
+                status = ""
+                if "status" in issue:
+                    status = f" [{_extract_status_name(issue['status']['value'])}]"
+
+                lines.append(f"  - {name}{status}")
+
+            if result["issue_count"] > 10:
+                lines.append(f"  ... and {result['issue_count'] - 10} more")
+
+            lines.append("")
+
+    return "\n".join(lines)
+
+
+@tool(
+    "check_quality",
+    """Run governance and quality checks on the data product catalog.
+
+Use when:
+- User asks about catalog health or data quality
+- User wants to find products without owners ("who owns X?")
+- User asks about orphaned or incomplete products
+- User needs a governance audit or compliance report
+- User asks "what needs attention" or "what's missing"
+
+Check types:
+- "missing_owners": Products without assigned owners (high severity)
+- "missing_descriptions": Products without documentation (medium severity)
+- "stale_products": Products not updated in 90+ days (low severity)
+- "orphaned_datasets": Datasets not linked to products (medium severity)
+- "incomplete_ports": Products missing input/output ports (medium severity)
+- "all": Run all checks (default)
+
+Returns: Quality report with issues grouped by severity""",
+    {
+        "check_type": str,
+    },
+)
+async def check_quality(args: dict[str, Any]) -> dict[str, Any]:
+    """Run quality checks on the data catalog.
+
+    Args:
+        args: Dictionary containing:
+            - check_type: Specific check to run, or "all" for all checks (default: "all")
+
+    Returns:
+        Tool response with quality report
+    """
+    check_type = args.get("check_type", "all")
+    client = get_client()
+
+    valid_checks = set(_QUALITY_CHECKS.keys()) | {"all"}
+    if check_type not in valid_checks:
+        return {
+            "content": [{"type": "text", "text": f"Error: check_type must be one of {valid_checks}"}],
+            "is_error": True,
+        }
+
+    try:
+        if check_type == "all":
+            results = [_run_quality_check(client, check_id) for check_id in _QUALITY_CHECKS]
+        else:
+            results = [_run_quality_check(client, check_type)]
+
+        text = _format_quality_report(results)
+        return {"content": [{"type": "text", "text": text}]}
+
     except DPRODClientError as e:
         return {
             "content": [{"type": "text", "text": f"Catalog error: {e}"}],
