@@ -1,6 +1,6 @@
 # DPROD Implementation Plan
 
-**Status:** Complete
+**Status:** In Progress (Phase 7 Planned)
 **Last Updated:** January 2025
 **Prerequisite:** spec.md (completed)
 
@@ -271,6 +271,171 @@ This document outlines the logical next steps following the completion of the DP
 
 ---
 
+## Phase 7: Agentic Interface ☐
+
+**Goal:** Create an AI agent interface for natural language interaction with the data product catalog
+
+### 7.1 Design Principles
+
+This phase follows research-backed patterns from context engineering best practices:
+
+| Principle | Source | Application |
+|-----------|--------|-------------|
+| **Architectural Reduction** | Tool Design | Single agent with consolidated tools outperforms multi-agent complexity |
+| **Consolidation Principle** | Tool Design | If a human can't decide which tool to use, neither can an agent |
+| **Context Isolation** | Multi-Agent Patterns | Sub-agents only when context limits are exceeded |
+| **GraphDB as Memory** | Memory Systems | No additional memory infrastructure needed—GraphDB is already a temporal knowledge graph |
+
+### 7.2 Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    DPROD CATALOG AGENT                           │
+│                                                                   │
+│  System Prompt: "You help users discover, understand, and        │
+│  manage data products in the enterprise catalog."                │
+│                                                                   │
+├─────────────────────────────────────────────────────────────────┤
+│                     CONSOLIDATED TOOL SET                        │
+│                                                                   │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
+│  │  catalog_query  │  │  trace_lineage  │  │ register_product│  │
+│  │  (search/get)   │  │  (up/down/full) │  │  (validate+add) │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
+│                                                                   │
+│  ┌─────────────────┐  ┌─────────────────┐                       │
+│  │  check_quality  │  │  run_sparql     │                       │
+│  │  (governance)   │  │  (advanced)     │                       │
+│  └─────────────────┘  └─────────────────┘                       │
+│                                                                   │
+├─────────────────────────────────────────────────────────────────┤
+│              GraphDB (Semantic Memory + Temporal KG)              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 7.3 Consolidated Tools
+
+| Tool | Purpose | Wraps Queries |
+|------|---------|---------------|
+| `catalog_query` | Search, list, and get product details | `list-products.rq`, `get-product.rq`, `find-by-*.rq`, `search.rq` |
+| `trace_lineage` | Trace upstream/downstream dependencies | `lineage-upstream.rq`, `lineage-downstream.rq`, `lineage-full.rq` |
+| `check_quality` | Run governance and quality checks | `orphaned-datasets.rq`, `missing-owners.rq`, `stale-products.rq`, `missing-descriptions.rq` |
+| `register_product` | Validate and ingest new products | SHACL validation + Graph Store API |
+| `run_sparql` | Execute custom SPARQL for advanced users | Direct SPARQL endpoint |
+
+### 7.4 Implementation Tasks
+
+| Task | Deliverable | Owner | Status |
+|------|-------------|-------|--------|
+| Create tool wrapper module | `src/dprod/tools.py` | Developer | ☐ Not Started |
+| Implement catalog_query tool | Tool with @tool decorator | Developer | ☐ Not Started |
+| Implement trace_lineage tool | Tool with @tool decorator | Developer | ☐ Not Started |
+| Implement check_quality tool | Tool with @tool decorator | Developer | ☐ Not Started |
+| Implement register_product tool | Tool with @tool decorator | Developer | ☐ Not Started |
+| Implement run_sparql tool | Tool with @tool decorator | Developer | ☐ Not Started |
+| Create MCP server | `src/dprod/mcp_server.py` | Developer | ☐ Not Started |
+| Write agent system prompt | `src/dprod/prompts.py` | Developer | ☐ Not Started |
+| Create agent entry point | `src/dprod/agent.py` | Developer | ☐ Not Started |
+| Add agent tests | `tests/test_agent.py` | Developer | ☐ Not Started |
+
+### 7.5 Tool Implementation Pattern
+
+Tools use the Claude Agent SDK `@tool` decorator wrapping the existing Python client:
+
+```python
+from claude_agent_sdk import tool, create_sdk_mcp_server
+from typing import Any
+from src.dprod.client import DPRODClient
+
+client = DPRODClient()
+
+@tool(
+    "catalog_query",
+    """Search and retrieve data products from the catalog.
+
+    Use when:
+    - User asks "what data products exist for X domain"
+    - User wants details about a specific product
+    - User searches by owner, status, or keyword
+
+    Returns: List of matching products with key metadata""",
+    {
+        "query_type": str,  # "search" | "get" | "list"
+        "filters": dict,    # domain, owner, status, keyword
+        "product_uri": str, # For "get" type
+        "format": str       # "concise" | "detailed"
+    }
+)
+async def catalog_query(args: dict[str, Any]) -> dict[str, Any]:
+    # Implementation wraps existing client methods
+    ...
+```
+
+### 7.6 Agent Configuration
+
+```python
+from claude_agent_sdk import ClaudeAgentOptions, create_sdk_mcp_server
+
+dprod_server = create_sdk_mcp_server(
+    name="dprod-catalog",
+    version="1.0.0",
+    tools=[catalog_query, trace_lineage, check_quality, register_product, run_sparql]
+)
+
+options = ClaudeAgentOptions(
+    model="sonnet",
+    system_prompt=CATALOG_AGENT_PROMPT,
+    mcp_servers={"catalog": dprod_server},
+    allowed_tools=[
+        "mcp__catalog__catalog_query",
+        "mcp__catalog__trace_lineage",
+        "mcp__catalog__check_quality",
+        "mcp__catalog__register_product",
+        "mcp__catalog__run_sparql"
+    ]
+)
+```
+
+### 7.7 Subagent Triggers (Only If Needed)
+
+Subagents should only be added when specific triggers are hit:
+
+| Trigger | Subagent | Rationale |
+|---------|----------|-----------|
+| Complex multi-step workflows (>5 tool calls) | `workflow-executor` | Context isolation prevents confusion |
+| Parallel exploration of multiple domains | `domain-explorer` | Parallelization benefit |
+| Deep schema analysis requiring file access | `schema-validator` | Different tool set needed |
+
+### 7.8 Memory Architecture
+
+No additional memory infrastructure required. GraphDB already provides:
+
+| Memory Layer | GraphDB Implementation |
+|--------------|------------------------|
+| Semantic Memory | DPROD ontology + DCAT relationships |
+| Temporal Memory | `dct:created`, `dct:modified` timestamps |
+| Entity Memory | Named graphs (`urn:data:products`, `urn:data:agents`) |
+| Relationship Memory | SPARQL traversal of `dprod:inputPort`/`dprod:outputPort` |
+
+### 7.9 Dependencies
+
+| Dependency | Version | Purpose |
+|------------|---------|---------|
+| claude-agent-sdk | latest | Agent framework and tool decorators |
+| anthropic | latest | Claude API client |
+
+### Acceptance Criteria — Phase 7
+
+- [ ] All 5 tools implemented and tested
+- [ ] MCP server created and functional
+- [ ] Agent responds correctly to catalog queries
+- [ ] Agent traces lineage with business context
+- [ ] Agent runs governance checks on request
+- [ ] Agent validates and registers new products
+- [ ] Integration tests pass against live GraphDB
+
+---
+
 ## Project Directory Structure
 
 ```
@@ -301,6 +466,14 @@ dprod-graphdb/
 │   ├── find-by-domain.rq
 │   ├── lineage-upstream.rq
 │   └── ...
+├── src/
+│   └── dprod/
+│       ├── __init__.py
+│       ├── client.py          # Existing GraphDB client
+│       ├── tools.py           # Agent tool definitions (Phase 7)
+│       ├── mcp_server.py      # MCP server setup (Phase 7)
+│       ├── prompts.py         # System prompts (Phase 7)
+│       └── agent.py           # Agent entry point (Phase 7)
 ├── scripts/
 │   ├── deploy.sh
 │   ├── load-ontologies.sh
@@ -310,8 +483,10 @@ dprod-graphdb/
 ├── tests/
 │   ├── valid/
 │   │   └── *.ttl
-│   └── invalid/
-│       └── *.ttl
+│   ├── invalid/
+│   │   └── *.ttl
+│   ├── test_client.py
+│   └── test_agent.py          # Agent tests (Phase 7)
 ├── docs/
 │   ├── api/
 │   ├── runbooks/
@@ -342,6 +517,9 @@ dprod-graphdb/
 | Integration complexity with existing systems | High | High | Start with simple read-only integrations |
 | Team unfamiliar with RDF/SPARQL | Medium | High | Plan training sessions in Phase 1 |
 | Ontology changes break existing data | High | Low | Version ontologies, maintain backward compatibility |
+| Agent tool selection ambiguity | Medium | Medium | Follow consolidation principle—fewer, comprehensive tools |
+| Agent context window exhaustion | Medium | Low | GraphDB handles memory; add subagents only if needed |
+| Claude Agent SDK API changes | Low | Medium | Pin SDK version, monitor release notes |
 
 ---
 
@@ -355,6 +533,8 @@ dprod-graphdb/
 | DCAT v3 ontology | Phase 1 | w3.org |
 | curl | All phases | System package |
 | Access to target infrastructure | Phase 1 | Internal |
+| claude-agent-sdk | Phase 7 | PyPI (anthropic) |
+| anthropic | Phase 7 | PyPI |
 
 ---
 
@@ -372,10 +552,14 @@ dprod-graphdb/
 
 ## Next Actions
 
-1. **Immediate:** Review and approve this plan
-2. **This Week:** Start Phase 1 — create `docker-compose.yml` and deployment scripts
-3. **Assign Owners:** Designate leads for each phase
-4. **Schedule:** Set up weekly progress reviews
+1. **Immediate:** Review Phase 7 agentic interface design
+2. **This Week:** Add `claude-agent-sdk` dependency to `pyproject.toml`
+3. **Implementation Priority:**
+   - Wrap existing Python client with `@tool` decorators
+   - Create MCP server with 5 consolidated tools
+   - Write system prompt optimized for catalog operations
+   - Test with real queries against sample products
+4. **Defer:** Add subagents only when specific triggers are hit (>5 tool calls, parallel domain exploration)
 
 ---
 
