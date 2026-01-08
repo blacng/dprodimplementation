@@ -766,6 +766,63 @@ curl -X DELETE \
   "http://localhost:7200/repositories/dprod-catalog/rdf-graphs/service?graph=urn:data:products"
 ```
 
+### 11.4 Lineage Visualization
+
+The lineage viewer provides an interactive DAG (Directed Acyclic Graph) visualization of data product dependencies.
+
+#### DAG Layout
+
+The visualization uses a left-to-right hierarchical layout powered by Dagre.js:
+- **Upstream sources** positioned on the left (negative depth values)
+- **Selected product** centered with highlight (depth 0)
+- **Downstream consumers** positioned on the right (positive depth values)
+
+Layout parameters: `rankdir: 'LR'`, `ranksep: 180`, `nodesep: 60`
+
+#### Depth-Based Coloring
+
+Nodes are colored based on their distance from the selected product:
+
+| Depth | Direction | Color | CSS Border |
+|-------|-----------|-------|------------|
+| -3 to -5 | Upstream (far) | Orange/Red | `border-orange-500` |
+| -2 | Upstream | Amber | `border-amber-500/50` |
+| -1 | Upstream (near) | Yellow | `border-yellow-500/50` |
+| 0 | Source | Cyan | `border-cyan-500` |
+| 1 | Downstream (near) | Emerald | `border-emerald-500/50` |
+| 2 | Downstream | Teal | `border-teal-500/50` |
+| 3 to 5 | Downstream (far) | Sky/Blue | `border-sky-500/50` |
+
+#### Domain Grouping
+
+Nodes sharing the same `domain_uri` are visually grouped:
+- Subtle background regions with dashed borders
+- Domain label displayed above each group
+- Helps identify products in the same business domain
+
+#### Animated Data Flow
+
+Edges display animated cyan particles flowing left-to-right:
+- 3 particles per edge with staggered timing (0s, 0.83s, 1.66s)
+- SVG `<animateMotion>` along smooth step edge paths
+- Glow filter for visual emphasis
+
+#### API Response Structure
+
+The lineage API returns depth information for each node:
+
+```json
+{
+  "source_uri": "urn:products/customer-360",
+  "direction": "full",
+  "nodes": [
+    { "uri": "...", "label": "...", "depth": 0, "is_source": true, "domain_label": "Customer Analytics" },
+    { "uri": "...", "label": "...", "depth": 1, "is_source": false, "domain_label": "Sales" }
+  ],
+  "edges": [...]
+}
+```
+
 ---
 
 ## 12. Security Configuration

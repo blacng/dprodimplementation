@@ -67,6 +67,7 @@ This document outlines the logical next steps following the completion of the DP
 | Create HR Workforce data product | `data/products/hr-workforce.ttl` | Data Architect | ✓ Complete |
 | Create Finance Reporting data product | `data/products/finance-reporting.ttl` | Data Architect | ✓ Complete |
 | Create Marketing Campaigns data product | `data/products/marketing-campaigns.ttl` | Data Architect | ✓ Complete |
+| Create Order Management data product (1:N example) | `data/products/order-management.ttl` | Data Architect | ✓ Complete |
 
 ### 2.2 Supporting Vocabulary
 
@@ -605,7 +606,8 @@ dprod-graphdb/
 │   │   ├── sales-analytics.ttl
 │   │   ├── hr-workforce.ttl
 │   │   ├── finance-reporting.ttl
-│   │   └── marketing-campaigns.ttl
+│   │   ├── marketing-campaigns.ttl
+│   │   └── order-management.ttl      # One-to-many example (1 product → 3 datasets)
 │   └── vocab/
 │       ├── domains.ttl
 │       ├── lifecycle-status.ttl
@@ -902,10 +904,71 @@ Layout:
 
 ---
 
+## Phase 10: DAG Lineage Visualization ✓
+
+**Goal:** Improve lineage visualization with proper DAG layout, depth-based coloring, domain grouping, and animated data flow
+
+### 10.1 Backend Changes
+
+| Task | Deliverable | Status |
+|------|-------------|--------|
+| Add `depth` field to LineageNodeResponse | `src/dprod/api/schemas/models.py` | ✓ Complete |
+| Add `domain_label` field to LineageNodeResponse | `src/dprod/api/schemas/models.py` | ✓ Complete |
+| Track depth during lineage traversal | `src/dprod/api/routes/lineage.py` | ✓ Complete |
+| Add domain fields to LineageEntry model | `src/dprod/models.py` | ✓ Complete |
+| Update SPARQL queries for domain labels | `src/dprod/client.py` | ✓ Complete |
+
+### 10.2 Frontend Changes
+
+| Task | Deliverable | Status |
+|------|-------------|--------|
+| Install dagre.js dependency | `frontend/package.json` | ✓ Complete |
+| Update LineageNode TypeScript interface | `frontend/src/api/types.ts` | ✓ Complete |
+| Implement DAG layout algorithm | `frontend/src/pages/LineagePage.tsx` | ✓ Complete |
+| Create depth-based node component | `frontend/src/pages/LineagePage.tsx` | ✓ Complete |
+| Implement domain grouping backgrounds | `frontend/src/pages/LineagePage.tsx` | ✓ Complete |
+| Create animated particle edge component | `frontend/src/pages/LineagePage.tsx` | ✓ Complete |
+| Add CSS animations | `frontend/src/index.css` | ✓ Complete |
+
+### 10.3 Key Implementation Details
+
+**DAG Layout:**
+- Uses Dagre.js with `rankdir: 'LR'` for left-to-right flow
+- `ranksep: 180` horizontal spacing, `nodesep: 60` vertical spacing
+- Automatic edge crossing minimization
+
+**Depth-Based Coloring:**
+- Upstream nodes (depth < 0): Orange → Yellow gradient
+- Source node (depth = 0): Cyan with ring highlight
+- Downstream nodes (depth > 0): Emerald → Sky gradient
+
+**Domain Grouping:**
+- Nodes with same `domain_uri` grouped with subtle background
+- Dashed border regions with domain labels
+- Color palette cycles through cyan, emerald, amber, violet, pink
+
+**Animated Data Flow:**
+- 3 cyan particles per edge with staggered timing
+- SVG `<animateMotion>` along smooth step paths
+- Glow filter for visual emphasis
+
+### Acceptance Criteria — Phase 10
+
+- [x] Nodes positioned hierarchically left-to-right by depth
+- [x] Source node highlighted with cyan ring, centered
+- [x] Upstream nodes on left (warm colors), downstream on right (cool colors)
+- [x] Nodes grouped visually by domain with labeled backgrounds
+- [x] Animated glowing particles flow along edges
+- [x] Existing controls (product dropdown, direction, depth) preserved
+- [x] Empty lineage and single node cases handled gracefully
+- [x] Dark theme matches Dashboard aesthetic
+
+---
+
 ## Next Actions
 
-1. **Immediate:** Implement Phase 9 Data Product Detail View
-2. **Implementation Priority:**
+1. **Complete:** Phase 10 DAG Lineage Visualization (✓)
+2. **In Progress:** Phase 9 Data Product Detail View
    - Backend: Add nested Pydantic models and `/detail` endpoint
    - Backend: Add `get_product_detail()` client method with SPARQL query
    - Frontend: Add TypeScript types and API client method

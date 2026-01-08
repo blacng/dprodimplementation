@@ -57,13 +57,15 @@ async def get_lineage(
     nodes: dict[str, LineageNodeResponse] = {}
     edges: list[LineageEdgeResponse] = []
 
-    # Add source node
+    # Add source node (depth 0)
     nodes[product_uri] = LineageNodeResponse(
         uri=product_uri,
         label=source_product.label,
         status_uri=source_product.status_uri,
         domain_uri=source_product.domain_uri,
+        domain_label=source_product.domain_label,
         is_source=True,
+        depth=0,
     )
 
     try:
@@ -112,11 +114,16 @@ def _trace_upstream(
 
         # Add node if not already present
         if entry.product_uri not in nodes:
+            # Upstream nodes have negative depth (further left in DAG)
+            upstream_depth = -(current_depth + 1)
             nodes[entry.product_uri] = LineageNodeResponse(
                 uri=entry.product_uri,
                 label=entry.product_label,
                 status_uri=entry.status_uri,
+                domain_uri=entry.domain_uri,
+                domain_label=entry.domain_label,
                 is_source=False,
+                depth=upstream_depth,
             )
 
             # Recurse
@@ -150,11 +157,16 @@ def _trace_downstream(
 
         # Add node if not already present
         if entry.product_uri not in nodes:
+            # Downstream nodes have positive depth (further right in DAG)
+            downstream_depth = current_depth + 1
             nodes[entry.product_uri] = LineageNodeResponse(
                 uri=entry.product_uri,
                 label=entry.product_label,
                 status_uri=entry.status_uri,
+                domain_uri=entry.domain_uri,
+                domain_label=entry.domain_label,
                 is_source=False,
+                depth=downstream_depth,
             )
 
             # Recurse

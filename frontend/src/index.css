@@ -1,21 +1,21 @@
 @import "tailwindcss";
 
-/* Custom scrollbar */
+/* Custom scrollbar - dark theme */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #1e293b;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #475569;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #64748b;
 }
 
 /* React Flow styles */
@@ -39,4 +39,48 @@
   from {
     stroke-dashoffset: 10;
   }
+}
+
+/* Lineage DAG visualization styles */
+.lineage-particle {
+  filter: url(#glow);
+  opacity: 0.9;
+}
+
+@keyframes particle-pulse {
+  0%, 100% {
+    opacity: 0.9;
+    r: 4;
+  }
+  50% {
+    opacity: 0.6;
+    r: 5;
+  }
+}
+
+.lineage-particle {
+  animation: particle-pulse 1.5s ease-in-out infinite;
+}
+
+/* Domain group fade-in */
+@keyframes domain-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.domain-group {
+  animation: domain-fade 0.5s ease-out forwards;
+}
+
+/* Lineage node hover effects */
+.react-flow__node-lineageNode {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.react-flow__node-lineageNode:hover {
+  z-index: 10;
 }

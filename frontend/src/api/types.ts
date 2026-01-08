@@ -91,7 +91,9 @@ export interface LineageNode {
   label: string;
   status_uri?: string;
   domain_uri?: string;
+  domain_label?: string;
   is_source: boolean;
+  depth: number;
 }
 
 export interface LineageEdge {

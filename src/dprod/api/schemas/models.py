@@ -164,7 +164,9 @@ class LineageNodeResponse(BaseModel):
     label: str = Field(description="Product label")
     status_uri: str | None = Field(default=None, description="Lifecycle status URI")
     domain_uri: str | None = Field(default=None, description="Domain URI")
+    domain_label: str | None = Field(default=None, description="Domain display name")
     is_source: bool = Field(default=False, description="Whether this is the source node")
+    depth: int = Field(default=0, description="Distance from source: negative=upstream, 0=source, positive=downstream")
 
 
 class LineageEdgeResponse(BaseModel):

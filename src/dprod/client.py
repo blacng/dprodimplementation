@@ -189,14 +189,14 @@ ORDER BY ?label
             NotFoundError: If the product doesn't exist
         """
         query = f"""{PREFIXES}
-SELECT ?label ?description ?owner ?domain ?status ?created ?modified
+SELECT ?label ?description ?owner ?domain ?domainLabel ?status ?created ?modified
 WHERE {{
   <{uri}> a dprod:DataProduct ;
           rdfs:label ?label .
 
   OPTIONAL {{ <{uri}> dct:description ?description }}
   OPTIONAL {{ <{uri}> dprod:dataProductOwner ?owner }}
-  OPTIONAL {{ <{uri}> dprod:domain ?domain }}
+  OPTIONAL {{ <{uri}> dprod:domain ?domain . ?domain rdfs:label ?domainLabel }}
   OPTIONAL {{ <{uri}> dprod:lifecycleStatus ?status }}
   OPTIONAL {{ <{uri}> dct:created ?created }}
   OPTIONAL {{ <{uri}> dct:modified ?modified }}
@@ -234,6 +234,7 @@ WHERE {{
             description=self._get_value(binding, "description"),
             owner_uri=self._get_value(binding, "owner"),
             domain_uri=self._get_value(binding, "domain"),
+            domain_label=self._get_value(binding, "domainLabel"),
             status_uri=self._get_value(binding, "status"),
             created=self._parse_date(self._get_value(binding, "created")),
             modified=self._parse_date(self._get_value(binding, "modified")),
@@ -693,7 +694,7 @@ ORDER BY ?label
             List of upstream products this product consumes from
         """
         query = f"""{PREFIXES}
-SELECT ?upstream ?upstreamLabel ?upstreamStatus ?viaPort ?portLabel
+SELECT ?upstream ?upstreamLabel ?upstreamStatus ?domain ?domainLabel ?viaPort ?portLabel
 WHERE {{
   <{product_uri}> dprod:inputPort ?viaPort .
 
@@ -703,6 +704,7 @@ WHERE {{
             dprod:lifecycleStatus ?upstreamStatus .
 
   OPTIONAL {{ ?viaPort rdfs:label ?portLabel }}
+  OPTIONAL {{ ?upstream dprod:domain ?domain . ?domain rdfs:label ?domainLabel }}
 }}
 ORDER BY ?upstreamLabel
 """
@@ -715,6 +717,8 @@ ORDER BY ?upstreamLabel
                     product_uri=self._get_value(binding, "upstream"),
                     product_label=self._get_value(binding, "upstreamLabel"),
                     status_uri=self._get_value(binding, "upstreamStatus"),
+                    domain_uri=self._get_value(binding, "domain"),
+                    domain_label=self._get_value(binding, "domainLabel"),
                     port_uri=self._get_value(binding, "viaPort"),
                     port_label=self._get_value(binding, "portLabel"),
                 )
@@ -732,7 +736,7 @@ ORDER BY ?upstreamLabel
             List of downstream products that consume from this product
         """
         query = f"""{PREFIXES}
-SELECT ?downstream ?downstreamLabel ?downstreamStatus ?viaPort ?portLabel
+SELECT ?downstream ?downstreamLabel ?downstreamStatus ?domain ?domainLabel ?viaPort ?portLabel
 WHERE {{
   <{product_uri}> dprod:outputPort ?viaPort .
 
@@ -742,6 +746,7 @@ WHERE {{
               dprod:lifecycleStatus ?downstreamStatus .
 
   OPTIONAL {{ ?viaPort rdfs:label ?portLabel }}
+  OPTIONAL {{ ?downstream dprod:domain ?domain . ?domain rdfs:label ?domainLabel }}
 }}
 ORDER BY ?downstreamLabel
 """
@@ -754,6 +759,8 @@ ORDER BY ?downstreamLabel
                     product_uri=self._get_value(binding, "downstream"),
                     product_label=self._get_value(binding, "downstreamLabel"),
                     status_uri=self._get_value(binding, "downstreamStatus"),
+                    domain_uri=self._get_value(binding, "domain"),
+                    domain_label=self._get_value(binding, "domainLabel"),
                     port_uri=self._get_value(binding, "viaPort"),
                     port_label=self._get_value(binding, "portLabel"),
                 )

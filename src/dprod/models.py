@@ -29,6 +29,7 @@ class DataProduct:
     description: str | None = None
     owner_uri: str | None = None
     domain_uri: str | None = None
+    domain_label: str | None = None
     status_uri: str | None = None
     created: date | None = None
     modified: date | None = None
@@ -44,6 +45,8 @@ class LineageEntry:
     product_uri: str
     product_label: str
     status_uri: str | None = None
+    domain_uri: str | None = None
+    domain_label: str | None = None
     port_uri: str | None = None
     port_label: str | None = None
 
