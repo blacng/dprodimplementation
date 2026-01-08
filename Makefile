@@ -230,6 +230,12 @@ load-products: ## Load sample data products
 		--data-binary @data/products/marketing-campaigns.ttl
 	@echo "    $(GREEN)Marketing Campaigns loaded$(NC)"
 
+	@echo "  Loading Order Management (1:N example)..."
+	@curl -sf -X POST "$(GRAPHDB_URL)/repositories/$(REPOSITORY_ID)/statements?context=%3Curn:data:products%3E" \
+		-H "Content-Type: text/turtle" \
+		--data-binary @data/products/order-management.ttl
+	@echo "    $(GREEN)Order Management loaded$(NC)"
+
 	@echo "$(GREEN)All data products loaded$(NC)"
 
 setup-full: setup load-vocab load-products ## Full setup including sample data
