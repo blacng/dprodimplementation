@@ -292,9 +292,10 @@ export default function DashboardPage() {
                   <div className="inline-block w-6 h-6 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
                 </div>
               ) : products?.slice(0, 5).map((product, idx) => (
-                <div
+                <Link
                   key={product.uri}
-                  className="p-4 hover:bg-slate-800/30 transition-colors group cursor-pointer"
+                  to={`/catalog/${encodeURIComponent(product.uri)}`}
+                  className="block p-4 hover:bg-slate-800/30 transition-colors group"
                   style={{ animation: `fadeSlideRight 0.4s ease-out ${0.7 + idx * 0.1}s both` }}
                 >
                   <div className="flex items-center justify-between">
@@ -318,7 +319,7 @@ export default function DashboardPage() {
                       <ArrowRight size={16} className="text-slate-600 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
 
               {(!products || products.length === 0) && !productsLoading && (
