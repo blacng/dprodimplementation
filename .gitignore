@@ -20,3 +20,6 @@ volumes/
 
 # Logs
 *.log
+
+# deployment docs
+deployment.md
