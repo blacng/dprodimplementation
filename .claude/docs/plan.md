@@ -1,7 +1,7 @@
 # DPROD Implementation Plan
 
-**Status:** In Progress (Phase 7-8 Complete)
-**Last Updated:** January 2025
+**Status:** In Progress (Phase 7-8, 10-11 Complete)
+**Last Updated:** January 2026
 **Prerequisite:** spec.md (completed)
 
 ---
@@ -965,16 +965,70 @@ Layout:
 
 ---
 
+## Phase 11: Dark Theme Unification ✓
+
+**Goal:** Unify frontend color scheme to consistent dark theme across all pages
+
+### 11.1 Overview
+
+The frontend previously had an inconsistent theme:
+- **Dark theme pages:** Dashboard, Lineage, ProductDetail (bg-slate-950, cyan accents)
+- **Light theme pages:** Catalog, Quality, Register, Layout, Sidebar, ChatPanel (bg-white, gray, blue accents)
+
+This created a jarring user experience when navigating between pages.
+
+### 11.2 Implementation
+
+| File | Changes | Status |
+|------|---------|--------|
+| `frontend/tailwind.config.js` | Updated primary colors from blue to cyan | ✓ Complete |
+| `frontend/src/components/common/Layout.tsx` | bg-gray-50 → bg-slate-950, header to dark | ✓ Complete |
+| `frontend/src/components/common/Sidebar.tsx` | bg-white → bg-slate-900, nav colors to cyan | ✓ Complete |
+| `frontend/src/components/chat/ChatPanel.tsx` | All elements to dark theme | ✓ Complete |
+| `frontend/src/pages/CatalogPage.tsx` | Cards, inputs, status badges to dark theme | ✓ Complete |
+| `frontend/src/pages/QualityPage.tsx` | SummaryCards, HealthScore, CheckSection to dark theme | ✓ Complete |
+| `frontend/src/pages/RegisterPage.tsx` | Form, progress steps, inputs to dark theme | ✓ Complete |
+
+### 11.3 Color Palette
+
+**Dark Theme Palette:**
+- Background: `bg-slate-950`
+- Cards/Surfaces: `bg-slate-900/50`, `bg-slate-900`
+- Borders: `border-slate-800`, `border-slate-700`
+- Text Primary: `text-white`, `text-slate-100`
+- Text Secondary: `text-slate-400`, `text-slate-500`
+- Accent: `cyan-400`, `cyan-500`, `cyan-600`
+
+**Status Colors (Consistent Across All Pages):**
+| Status | Classes |
+|--------|---------|
+| Consume | `bg-emerald-500/10 text-emerald-400 border-emerald-500/20` |
+| Build | `bg-cyan-500/10 text-cyan-400 border-cyan-500/20` |
+| Design | `bg-amber-500/10 text-amber-400 border-amber-500/20` |
+| Retire | `bg-red-500/10 text-red-400 border-red-500/20` |
+
+### Acceptance Criteria — Phase 11
+
+- [x] All pages have consistent bg-slate-950 background
+- [x] Cards use bg-slate-900/50 with border-slate-800
+- [x] Text contrast maintained (white primary, slate-400 secondary)
+- [x] Status colors consistent across Dashboard, Catalog, Quality, ProductDetail
+- [x] Interactive elements (buttons, inputs) use cyan accents
+- [x] No TypeScript errors
+
+---
+
 ## Next Actions
 
-1. **Complete:** Phase 10 DAG Lineage Visualization (✓)
-2. **In Progress:** Phase 9 Data Product Detail View
+1. **Complete:** Phase 11 Dark Theme Unification (✓)
+2. **Complete:** Phase 10 DAG Lineage Visualization (✓)
+3. **In Progress:** Phase 9 Data Product Detail View
    - Backend: Add nested Pydantic models and `/detail` endpoint
    - Backend: Add `get_product_detail()` client method with SPARQL query
    - Frontend: Add TypeScript types and API client method
    - Frontend: Create ProductDetailPage with dark theme
    - Frontend: Update catalog navigation to detail page
-3. **Defer:** Advanced features (bulk operations, export/import, SPARQL playground)
+4. **Defer:** Advanced features (bulk operations, export/import, SPARQL playground)
 
 ---
 

@@ -37,14 +37,14 @@ export default function QualityPage() {
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+      <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400">
         Failed to load quality report. Make sure GraphDB is running.
       </div>
     );
@@ -56,8 +56,8 @@ export default function QualityPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Quality Dashboard</h1>
-        <p className="text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold text-white">Quality Dashboard</h1>
+        <p className="text-slate-500 mt-1">
           Monitor catalog health and resolve issues
         </p>
       </div>
@@ -91,8 +91,8 @@ export default function QualityPage() {
       </div>
 
       {/* Health score */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
+        <h2 className="text-lg font-semibold text-white mb-4">
           Catalog Health Score
         </h2>
         <HealthScore
@@ -103,8 +103,8 @@ export default function QualityPage() {
       </div>
 
       {/* Issues by check type */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
+        <h2 className="text-lg font-semibold text-white mb-4">
           Issues by Category
         </h2>
         <div className="space-y-4">
@@ -116,9 +116,9 @@ export default function QualityPage() {
 
       {/* All high severity issues */}
       {report.high_severity_count > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <AlertCircle className="text-red-500" size={20} />
+        <div className="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
+          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <AlertCircle className="text-red-400" size={20} />
             High Priority Issues
           </h2>
           <div className="space-y-2">
@@ -147,19 +147,19 @@ function SummaryCard({
   color: 'blue' | 'green' | 'yellow' | 'red' | 'gray';
 }) {
   const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600',
-    green: 'bg-green-50 text-green-600',
-    yellow: 'bg-yellow-50 text-yellow-600',
-    red: 'bg-red-50 text-red-600',
-    gray: 'bg-gray-50 text-gray-600',
+    blue: 'bg-cyan-500/10 text-cyan-400',
+    green: 'bg-emerald-500/10 text-emerald-400',
+    yellow: 'bg-amber-500/10 text-amber-400',
+    red: 'bg-red-500/10 text-red-400',
+    gray: 'bg-slate-800 text-slate-400',
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
+    <div className="bg-slate-900/50 rounded-lg border border-slate-800 p-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-500">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+          <p className="text-sm text-slate-500">{title}</p>
+          <p className="text-2xl font-bold text-white mt-1">{value}</p>
         </div>
         <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
           <Icon size={24} />
@@ -190,10 +190,10 @@ function HealthScore({
   );
 
   const getScoreColor = () => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
-    if (score >= 40) return 'text-orange-600';
-    return 'text-red-600';
+    if (score >= 80) return 'text-emerald-400';
+    if (score >= 60) return 'text-amber-400';
+    if (score >= 40) return 'text-orange-400';
+    return 'text-red-400';
   };
 
   const getScoreLabel = () => {
@@ -209,17 +209,17 @@ function HealthScore({
         <div className={`text-5xl font-bold ${getScoreColor()}`}>
           {Math.round(score)}
         </div>
-        <div className="text-sm text-gray-500 mt-1">{getScoreLabel()}</div>
+        <div className="text-sm text-slate-500 mt-1">{getScoreLabel()}</div>
       </div>
 
       <div className="flex-1">
-        <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
+        <div className="h-4 bg-slate-800 rounded-full overflow-hidden">
           <div
             className={`h-full transition-all duration-500 ${
               score >= 80
-                ? 'bg-green-500'
+                ? 'bg-emerald-500'
                 : score >= 60
-                ? 'bg-yellow-500'
+                ? 'bg-amber-500'
                 : score >= 40
                 ? 'bg-orange-500'
                 : 'bg-red-500'
@@ -227,7 +227,7 @@ function HealthScore({
             style={{ width: `${score}%` }}
           />
         </div>
-        <p className="text-sm text-gray-500 mt-2">
+        <p className="text-sm text-slate-500 mt-2">
           {issues === 0
             ? 'No issues found. Your catalog is in great shape!'
             : `${issues} issues need to be resolved to improve the score.`}
@@ -242,17 +242,17 @@ function CheckSection({ check }: { check: QualityCheck }) {
   const label = CHECK_LABELS[check.check_type] || check.check_type;
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4">
+    <div className="border border-slate-700 rounded-lg p-4">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <Icon className="text-gray-400" size={20} />
-          <h3 className="font-medium text-gray-900">{label}</h3>
+          <Icon className="text-slate-500" size={20} />
+          <h3 className="font-medium text-white">{label}</h3>
         </div>
         <span
           className={`px-2 py-1 text-sm font-medium rounded-full ${
             check.issue_count === 0
-              ? 'bg-green-100 text-green-700'
-              : 'bg-yellow-100 text-yellow-700'
+              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+              : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
           }`}
         >
           {check.issue_count} issues
@@ -265,7 +265,7 @@ function CheckSection({ check }: { check: QualityCheck }) {
             <IssueRow key={idx} issue={issue} compact />
           ))}
           {check.issues.length > 3 && (
-            <p className="text-sm text-gray-500 pl-2">
+            <p className="text-sm text-slate-500 pl-2">
               +{check.issues.length - 3} more
             </p>
           )}
@@ -285,28 +285,28 @@ function IssueRow({
   const getSeverityIcon = () => {
     switch (issue.severity) {
       case 'high':
-        return <AlertCircle className="text-red-500" size={16} />;
+        return <AlertCircle className="text-red-400" size={16} />;
       case 'medium':
-        return <AlertTriangle className="text-yellow-500" size={16} />;
+        return <AlertTriangle className="text-amber-400" size={16} />;
       default:
-        return <Info className="text-blue-500" size={16} />;
+        return <Info className="text-cyan-400" size={16} />;
     }
   };
 
   return (
     <div
       className={`flex items-start gap-3 ${
-        compact ? 'py-1' : 'bg-gray-50 rounded-lg p-3'
+        compact ? 'py-1' : 'bg-slate-800/50 rounded-lg p-3'
       }`}
     >
       {getSeverityIcon()}
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-gray-900 truncate">
+        <p className="font-medium text-white truncate">
           {issue.product_label}
         </p>
-        <p className="text-sm text-gray-500">{issue.description}</p>
+        <p className="text-sm text-slate-500">{issue.description}</p>
         {issue.suggestion && !compact && (
-          <p className="text-sm text-primary-600 mt-1">
+          <p className="text-sm text-cyan-400 mt-1">
             Suggestion: {issue.suggestion}
           </p>
         )}

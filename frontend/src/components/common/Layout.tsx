@@ -8,24 +8,24 @@ export default function Layout() {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-slate-950">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <header className="bg-slate-900 border-b border-slate-800 px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-800">
+            <h1 className="text-xl font-semibold text-white">
               DPROD Data Product Catalog
             </h1>
             <button
               onClick={() => setIsChatOpen(!isChatOpen)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 isChatOpen
-                  ? 'bg-primary-100 text-primary-700'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-cyan-500/10 text-cyan-400'
+                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
               }`}
             >
               <MessageSquare size={20} />
@@ -42,7 +42,7 @@ export default function Layout() {
 
           {/* Chat panel */}
           {isChatOpen && (
-            <div className="w-96 border-l border-gray-200 bg-white">
+            <div className="w-96 border-l border-slate-800 bg-slate-900">
               <ChatPanel onClose={() => setIsChatOpen(false)} />
             </div>
           )}

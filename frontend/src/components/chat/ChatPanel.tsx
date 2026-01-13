@@ -94,16 +94,16 @@ export default function ChatPanel({ onClose }: ChatPanelProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-4 border-b border-slate-800">
         <div>
-          <h3 className="font-semibold text-gray-800">Chat Assistant</h3>
-          <p className="text-xs text-gray-500">
+          <h3 className="font-semibold text-white">Chat Assistant</h3>
+          <p className="text-xs text-slate-500">
             {isConnected ? 'Connected' : 'Connecting...'}
           </p>
         </div>
         <button
           onClick={onClose}
-          className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+          className="p-2 text-slate-500 hover:text-slate-300 rounded-lg hover:bg-slate-800"
         >
           <X size={20} />
         </button>
@@ -112,7 +112,7 @@ export default function ChatPanel({ onClose }: ChatPanelProps) {
       {/* Messages */}
       <div className="flex-1 overflow-auto p-4 space-y-4">
         {messages.length === 0 && (
-          <div className="text-center text-gray-400 py-8">
+          <div className="text-center text-slate-500 py-8">
             <p className="mb-2">Ask me anything about the data catalog!</p>
             <p className="text-sm">
               Try: "List all products" or "Check quality issues"
@@ -130,12 +130,12 @@ export default function ChatPanel({ onClose }: ChatPanelProps) {
             <div
               className={`max-w-[80%] rounded-lg px-4 py-2 ${
                 message.type === 'user'
-                  ? 'bg-primary-600 text-white'
+                  ? 'bg-cyan-600 text-white'
                   : message.type === 'error'
-                  ? 'bg-red-100 text-red-700'
+                  ? 'bg-red-500/10 text-red-400'
                   : message.type === 'system'
-                  ? 'bg-gray-100 text-gray-600 text-sm'
-                  : 'bg-gray-100 text-gray-800'
+                  ? 'bg-slate-800 text-slate-400 text-sm'
+                  : 'bg-slate-800 text-slate-200'
               }`}
             >
               <p className="whitespace-pre-wrap">{message.content}</p>
@@ -145,8 +145,8 @@ export default function ChatPanel({ onClose }: ChatPanelProps) {
 
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-lg px-4 py-2">
-              <Loader2 className="animate-spin text-gray-400" size={20} />
+            <div className="bg-slate-800 rounded-lg px-4 py-2">
+              <Loader2 className="animate-spin text-slate-400" size={20} />
             </div>
           </div>
         )}
@@ -155,7 +155,7 @@ export default function ChatPanel({ onClose }: ChatPanelProps) {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-slate-800">
         <div className="flex gap-2">
           <input
             type="text"
@@ -164,12 +164,12 @@ export default function ChatPanel({ onClose }: ChatPanelProps) {
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             disabled={!isConnected || isLoading}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
+            className="flex-1 px-4 py-2 bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent disabled:bg-slate-900"
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || !isConnected || isLoading}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send size={20} />
           </button>

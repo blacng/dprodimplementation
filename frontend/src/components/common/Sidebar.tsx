@@ -17,16 +17,16 @@ const navItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
+    <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col">
       {/* Logo */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-            <Database className="text-white" size={24} />
+          <div className="w-10 h-10 bg-cyan-500/20 border border-cyan-500/30 rounded-lg flex items-center justify-center">
+            <Database className="text-cyan-400" size={24} />
           </div>
           <div>
-            <h2 className="font-bold text-gray-900">DPROD</h2>
-            <p className="text-xs text-gray-500">Data Catalog</p>
+            <h2 className="font-bold text-white">DPROD</h2>
+            <p className="text-xs text-slate-500">Data Catalog</p>
           </div>
         </div>
       </div>
@@ -40,8 +40,8 @@ export default function Sidebar() {
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                 isActive
-                  ? 'bg-primary-50 text-primary-700'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-cyan-500/10 text-cyan-400'
+                  : 'text-slate-400 hover:bg-slate-800'
               }`
             }
           >
@@ -52,8 +52,8 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200">
-        <p className="text-xs text-gray-400 text-center">
+      <div className="p-4 border-t border-slate-800">
+        <p className="text-xs text-slate-600 text-center">
           DPROD Catalog v1.0.0
         </p>
       </div>

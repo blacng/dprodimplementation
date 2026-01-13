@@ -126,10 +126,10 @@ export default function RegisterPage() {
     <div className="max-w-2xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-white">
           Register New Data Product
         </h1>
-        <p className="text-gray-500 mt-1">
+        <p className="text-slate-500 mt-1">
           Add a new data product to the catalog
         </p>
       </div>
@@ -142,17 +142,17 @@ export default function RegisterPage() {
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                   index < step
-                    ? 'bg-primary-600 text-white'
+                    ? 'bg-cyan-500 text-white'
                     : index === step
-                    ? 'bg-primary-100 text-primary-700 ring-2 ring-primary-600'
-                    : 'bg-gray-100 text-gray-500'
+                    ? 'bg-cyan-500/20 text-cyan-400 ring-2 ring-cyan-500'
+                    : 'bg-slate-800 text-slate-500'
                 }`}
               >
                 {index < step ? <Check size={16} /> : index + 1}
               </div>
               <span
                 className={`ml-2 text-sm hidden sm:block ${
-                  index === step ? 'font-medium text-gray-900' : 'text-gray-500'
+                  index === step ? 'font-medium text-white' : 'text-slate-500'
                 }`}
               >
                 {label}
@@ -160,7 +160,7 @@ export default function RegisterPage() {
               {index < STEPS.length - 1 && (
                 <div
                   className={`w-12 sm:w-24 h-0.5 mx-2 ${
-                    index < step ? 'bg-primary-600' : 'bg-gray-200'
+                    index < step ? 'bg-cyan-500' : 'bg-slate-700'
                   }`}
                 />
               )}
@@ -170,7 +170,7 @@ export default function RegisterPage() {
       </div>
 
       {/* Form */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
         {step === 0 && (
           <BasicInfoStep
             formData={formData}
@@ -202,18 +202,18 @@ export default function RegisterPage() {
 
         {/* Error message */}
         {createMutation.isError && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
+          <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-400">
             <AlertCircle size={20} />
             <span>Failed to create product. Please try again.</span>
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
+        <div className="flex justify-between mt-8 pt-6 border-t border-slate-800">
           <button
             onClick={handleBack}
             disabled={step === 0}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronLeft size={20} />
             Back
@@ -222,7 +222,7 @@ export default function RegisterPage() {
           <button
             onClick={handleNext}
             disabled={createMutation.isPending}
-            className="flex items-center gap-2 px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 disabled:opacity-50"
           >
             {createMutation.isPending ? (
               'Creating...'
@@ -256,7 +256,7 @@ function BasicInfoStep({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-slate-300 mb-1">
           Product Name *
         </label>
         <input
@@ -264,17 +264,17 @@ function BasicInfoStep({
           value={formData.label}
           onChange={(e) => updateField('label', e.target.value)}
           placeholder="e.g., Customer 360"
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-            errors.label ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-2 bg-slate-800 text-white placeholder-slate-500 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+            errors.label ? 'border-red-500' : 'border-slate-700'
           }`}
         />
         {errors.label && (
-          <p className="text-sm text-red-500 mt-1">{errors.label}</p>
+          <p className="text-sm text-red-400 mt-1">{errors.label}</p>
         )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-slate-300 mb-1">
           Description *
         </label>
         <textarea
@@ -282,12 +282,12 @@ function BasicInfoStep({
           onChange={(e) => updateField('description', e.target.value)}
           placeholder="Describe the data product and its purpose..."
           rows={4}
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-            errors.description ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-2 bg-slate-800 text-white placeholder-slate-500 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+            errors.description ? 'border-red-500' : 'border-slate-700'
           }`}
         />
         {errors.description && (
-          <p className="text-sm text-red-500 mt-1">{errors.description}</p>
+          <p className="text-sm text-red-400 mt-1">{errors.description}</p>
         )}
       </div>
     </div>
@@ -315,14 +315,14 @@ function ConfigurationStep({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-slate-300 mb-1">
           Owner *
         </label>
         <select
           value={formData.owner_uri}
           onChange={(e) => updateField('owner_uri', e.target.value)}
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-            errors.owner_uri ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-2 bg-slate-800 text-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+            errors.owner_uri ? 'border-red-500' : 'border-slate-700'
           }`}
         >
           <option value="">Select an owner...</option>
@@ -333,19 +333,19 @@ function ConfigurationStep({
           ))}
         </select>
         {errors.owner_uri && (
-          <p className="text-sm text-red-500 mt-1">{errors.owner_uri}</p>
+          <p className="text-sm text-red-400 mt-1">{errors.owner_uri}</p>
         )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-slate-300 mb-1">
           Domain *
         </label>
         <select
           value={formData.domain_uri}
           onChange={(e) => updateField('domain_uri', e.target.value)}
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-            errors.domain_uri ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-2 bg-slate-800 text-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+            errors.domain_uri ? 'border-red-500' : 'border-slate-700'
           }`}
         >
           <option value="">Select a domain...</option>
@@ -356,18 +356,18 @@ function ConfigurationStep({
           ))}
         </select>
         {errors.domain_uri && (
-          <p className="text-sm text-red-500 mt-1">{errors.domain_uri}</p>
+          <p className="text-sm text-red-400 mt-1">{errors.domain_uri}</p>
         )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-slate-300 mb-1">
           Lifecycle Status
         </label>
         <select
           value={formData.status_uri}
           onChange={(e) => updateField('status_uri', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full px-4 py-2 bg-slate-800 text-white border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
         >
           {LIFECYCLE_STATUSES.map((status) => (
             <option key={status.uri} value={status.uri}>
@@ -395,25 +395,25 @@ function OutputPortsStep({
 }) {
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-slate-400">
         Define the output ports that expose data from this product.
       </p>
 
       {errors.output_ports && (
-        <p className="text-sm text-red-500">{errors.output_ports}</p>
+        <p className="text-sm text-red-400">{errors.output_ports}</p>
       )}
 
       {formData.output_ports.map((port, index) => (
         <div
           key={index}
-          className="border border-gray-200 rounded-lg p-4 space-y-3"
+          className="border border-slate-700 rounded-lg p-4 space-y-3"
         >
           <div className="flex items-center justify-between">
-            <h4 className="font-medium text-gray-900">Port {index + 1}</h4>
+            <h4 className="font-medium text-white">Port {index + 1}</h4>
             {formData.output_ports.length > 1 && (
               <button
                 onClick={() => removePort(index)}
-                className="text-red-500 hover:text-red-700"
+                className="text-red-400 hover:text-red-300"
               >
                 <Trash2 size={18} />
               </button>
@@ -421,7 +421,7 @@ function OutputPortsStep({
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-1">
+            <label className="block text-sm text-slate-400 mb-1">
               Port Label *
             </label>
             <input
@@ -429,12 +429,12 @@ function OutputPortsStep({
               value={port.label}
               onChange={(e) => updatePort(index, 'label', e.target.value)}
               placeholder="e.g., Customer Events API"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 bg-slate-800 text-white placeholder-slate-500 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-1">
+            <label className="block text-sm text-slate-400 mb-1">
               Description
             </label>
             <input
@@ -442,7 +442,7 @@ function OutputPortsStep({
               value={port.description || ''}
               onChange={(e) => updatePort(index, 'description', e.target.value)}
               placeholder="Describe what this port provides..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 bg-slate-800 text-white placeholder-slate-500 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
             />
           </div>
         </div>
@@ -450,7 +450,7 @@ function OutputPortsStep({
 
       <button
         onClick={addPort}
-        className="flex items-center gap-2 text-primary-600 hover:text-primary-700"
+        className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300"
       >
         <Plus size={20} />
         Add Another Port
@@ -473,37 +473,37 @@ function ReviewStep({
 
   return (
     <div className="space-y-4">
-      <h3 className="font-medium text-gray-900">Review Your Data Product</h3>
+      <h3 className="font-medium text-white">Review Your Data Product</h3>
 
-      <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+      <div className="bg-slate-800/50 rounded-lg p-4 space-y-3">
         <div>
-          <span className="text-sm text-gray-500">Name:</span>
-          <p className="font-medium text-gray-900">{formData.label}</p>
+          <span className="text-sm text-slate-500">Name:</span>
+          <p className="font-medium text-white">{formData.label}</p>
         </div>
 
         <div>
-          <span className="text-sm text-gray-500">Description:</span>
-          <p className="text-gray-700">{formData.description}</p>
+          <span className="text-sm text-slate-500">Description:</span>
+          <p className="text-slate-300">{formData.description}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <span className="text-sm text-gray-500">Domain:</span>
-            <p className="text-gray-900">{getDomainLabel(formData.domain_uri)}</p>
+            <span className="text-sm text-slate-500">Domain:</span>
+            <p className="text-white">{getDomainLabel(formData.domain_uri)}</p>
           </div>
           <div>
-            <span className="text-sm text-gray-500">Status:</span>
-            <p className="text-gray-900">{getStatusLabel(formData.status_uri)}</p>
+            <span className="text-sm text-slate-500">Status:</span>
+            <p className="text-white">{getStatusLabel(formData.status_uri)}</p>
           </div>
         </div>
 
         <div>
-          <span className="text-sm text-gray-500">Output Ports:</span>
+          <span className="text-sm text-slate-500">Output Ports:</span>
           <ul className="mt-1 space-y-1">
             {formData.output_ports
               .filter((p) => p.label)
               .map((port, i) => (
-                <li key={i} className="text-gray-900">
+                <li key={i} className="text-white">
                   • {port.label}
                 </li>
               ))}
