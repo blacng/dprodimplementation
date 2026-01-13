@@ -116,13 +116,18 @@ export const healthApi = {
 export function createChatConnection(
   onMessage: (message: { type: string; content: string }) => void,
   onError: (error: Event) => void,
-  onClose: () => void
+  onClose: () => void,
+  onOpen?: () => void
 ): {
   send: (content: string) => void;
   close: () => void;
 } {
   const wsUrl = API_BASE.replace('http', 'ws');
   const ws = new WebSocket(`${wsUrl}/ws/chat`);
+
+  ws.onopen = () => {
+    onOpen?.();
+  };
 
   ws.onmessage = (event) => {
     try {

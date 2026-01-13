@@ -54,10 +54,14 @@ export default function ChatPanel({ onClose }: ChatPanelProps) {
       },
       () => {
         setIsConnected(false);
+      },
+      () => {
+        // onOpen callback - connection established
+        setIsConnected(true);
+        // Clear any previous connection error messages
+        setMessages((prev) => prev.filter((m) => m.content !== 'Connection error. Please try again.'));
       }
     );
-
-    setIsConnected(true);
 
     return () => {
       connectionRef.current?.close();
