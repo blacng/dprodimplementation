@@ -46,8 +46,11 @@ export default function DashboardPage() {
     {} as Record<string, number>
   );
 
+  // Health score weighted by severity: high=10, medium=5, low=1
   const healthScore = quality && products
-    ? Math.round(((products.length - quality.total_issues) / Math.max(products.length, 1)) * 100)
+    ? Math.max(0, Math.min(100, Math.round(
+        100 - (quality.high_severity_count * 10 + quality.medium_severity_count * 5 + quality.low_severity_count * 1)
+      )))
     : 0;
 
   return (
