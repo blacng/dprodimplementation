@@ -38,11 +38,13 @@ def create_app(
     # CORS configuration
     if enable_cors:
         origins = cors_origins or [
-            "http://localhost:3000",  # React dev server (Vite default)
+            "http://localhost:3000",  # React dev server
             "http://localhost:5173",  # Vite default
+            "http://localhost:5174",  # Vite alternate port
             "http://localhost:8080",  # Alternative dev port
             "http://127.0.0.1:3000",
             "http://127.0.0.1:5173",
+            "http://127.0.0.1:5174",
         ]
 
         app.add_middleware(
