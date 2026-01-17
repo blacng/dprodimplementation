@@ -1,0 +1,41 @@
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@base <https://data.vcondition.com/> .
+
+# HR Workforce Data Product
+<products/hr-workforce> a dprod:DataProduct ;
+    rdfs:label "HR Workforce" ;
+    dct:title "HR Workforce Analytics Data Product" ;
+    dct:description "Workforce analytics covering headcount, attrition, performance metrics, and talent insights" ;
+    dprod:dataProductOwner <agents/hr-team> ;
+    dprod:domain <domains/human-resources> ;
+    dprod:lifecycleStatus <https://ekgf.github.io/dprod/data/lifecycle-status/Consume> ;
+    dprod:purpose "Enable workforce planning, identify retention risks, and optimize talent management" ;
+    dprod:outputPort <services/hr-workforce-api> ;
+    dct:created "2024-02-01"^^xsd:date ;
+    dct:modified "2024-10-20"^^xsd:date .
+
+# Output Port
+<services/hr-workforce-api> a dcat:DataService ;
+    rdfs:label "HR Workforce API" ;
+    dct:description "REST API for workforce metrics and employee analytics" ;
+    dcat:endpointURL <https://api.vcondition.com/v1/workforce> ;
+    dprod:protocol <protocols/rest> ;
+    dcat:servesDataset <datasets/workforce-metrics> .
+
+# Dataset
+<datasets/workforce-metrics> a dcat:Dataset ;
+    rdfs:label "Workforce Metrics Dataset" ;
+    dct:title "Workforce Metrics Dataset" ;
+    dct:description "Aggregated workforce metrics including headcount, attrition, and performance data" ;
+    dcat:distribution <distributions/workforce-metrics-json> .
+
+# Distribution
+<distributions/workforce-metrics-json> a dcat:Distribution ;
+    rdfs:label "Workforce Metrics - JSON" ;
+    dct:format <https://www.iana.org/assignments/media-types/application/json> ;
+    dcat:mediaType "application/json" .

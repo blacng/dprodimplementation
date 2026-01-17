@@ -1,0 +1,21 @@
+# Get complete data lineage graph across all data products
+# Returns all producer-consumer relationships in the catalog
+#
+# Use this to visualize the full data product dependency graph
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?upstream ?upstreamLabel ?downstream ?downstreamLabel ?viaPort ?portLabel
+WHERE {
+  ?upstream a dprod:DataProduct ;
+            rdfs:label ?upstreamLabel ;
+            dprod:outputPort ?viaPort .
+
+  ?downstream a dprod:DataProduct ;
+              rdfs:label ?downstreamLabel ;
+              dprod:inputPort ?viaPort .
+
+  OPTIONAL { ?viaPort rdfs:label ?portLabel }
+}
+ORDER BY ?upstreamLabel ?downstreamLabel

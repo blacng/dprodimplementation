@@ -1,0 +1,15 @@
+# Count data products by domain
+# Returns aggregated statistics for each domain
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?domain ?domainLabel (COUNT(?product) AS ?productCount)
+WHERE {
+  ?product a dprod:DataProduct ;
+           dprod:domain ?domain .
+
+  ?domain rdfs:label ?domainLabel .
+}
+GROUP BY ?domain ?domainLabel
+ORDER BY DESC(?productCount)

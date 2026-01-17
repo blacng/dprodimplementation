@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design 3: Editorial Broadsheet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --coral: #ff6b4a;
+      --black: #1a1a1a;
+      --gray: #666;
+      --light-gray: #f5f5f5;
+    }
+
+    body {
+      font-family: 'Source Sans 3', sans-serif;
+      background: white;
+      color: var(--black);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Masthead */
+    .masthead {
+      border-bottom: 2px solid var(--black);
+      padding-bottom: 1rem;
+      margin-bottom: 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .masthead-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      color: var(--gray);
+    }
+
+    .masthead-date {
+      font-size: 0.75rem;
+      color: var(--gray);
+    }
+
+    /* Headline */
+    .headline {
+      font-family: 'Playfair Display', serif;
+      font-size: 5rem;
+      font-weight: 400;
+      line-height: 0.95;
+      margin-bottom: 2rem;
+      letter-spacing: -0.02em;
+    }
+
+    .headline-italic {
+      font-style: italic;
+    }
+
+    /* Status bar */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      background: var(--coral);
+    }
+
+    .status-text {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--coral);
+      font-weight: 600;
+    }
+
+    .status-line {
+      flex: 1;
+      height: 1px;
+      background: #e0e0e0;
+    }
+
+    /* Byline */
+    .byline {
+      display: flex;
+      gap: 3rem;
+      font-size: 0.9rem;
+      color: var(--gray);
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .byline-item {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .byline-label {
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: #999;
+    }
+
+    /* Description with drop cap */
+    .description {
+      font-size: 1.15rem;
+      line-height: 1.8;
+      color: #444;
+      margin-bottom: 3rem;
+      max-width: 700px;
+    }
+
+    .drop-cap {
+      float: left;
+      font-family: 'Playfair Display', serif;
+      font-size: 4rem;
+      line-height: 0.8;
+      padding-right: 0.5rem;
+      padding-top: 0.25rem;
+      color: var(--black);
+    }
+
+    /* Two column layout */
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+
+    /* Article section */
+    .article {
+      border-top: 2px solid var(--black);
+      padding-top: 1rem;
+    }
+
+    .article-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.75rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Stat card */
+    .stat-card {
+      background: var(--light-gray);
+      padding: 1.5rem;
+      border-left: 4px solid var(--coral);
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 400;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gray);
+    }
+
+    /* Port item */
+    .port-item {
+      margin-bottom: 1.5rem;
+    }
+
+    .port-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .port-protocol {
+      display: inline-block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.2rem 0.5rem;
+      border: 1px solid var(--coral);
+      color: var(--coral);
+      margin-bottom: 0.75rem;
+    }
+
+    .port-description {
+      font-size: 0.9rem;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    .endpoint-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: var(--coral);
+      word-break: break-all;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+      border: 1px dashed #ccc;
+    }
+
+    .empty-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      opacity: 0.5;
+    }
+
+    .empty-text {
+      font-style: italic;
+      color: var(--gray);
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 4rem;
+      padding-top: 1rem;
+      border-top: 2px solid var(--black);
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--gray);
+    }
+
+    /* Dataset section */
+    .dataset-section {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: white;
+      border: 1px solid #e0e0e0;
+    }
+
+    .dataset-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gray);
+      margin-bottom: 0.5rem;
+    }
+
+    .dataset-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .format-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.25rem 0.5rem;
+      background: var(--black);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="masthead">
+      <span class="masthead-title">Data Product Catalog</span>
+      <span class="masthead-date">Vol. 1 - No. 247 - January 2025</span>
+    </header>
+
+    <h1 class="headline">
+      Customer<br>
+      <span class="headline-italic">360</span>
+    </h1>
+
+    <div class="status-bar">
+      <div class="status-dot"></div>
+      <span class="status-text">Live & Consuming</span>
+      <div class="status-line"></div>
+    </div>
+
+    <div class="byline">
+      <div class="byline-item">
+        <span class="byline-label">Owner</span>
+        <span>Customer Data Team</span>
+      </div>
+      <div class="byline-item">
+        <span class="byline-label">Domain</span>
+        <span>Customer Analytics</span>
+      </div>
+      <div class="byline-item">
+        <span class="byline-label">Since</span>
+        <span>January 2024</span>
+      </div>
+    </div>
+
+    <p class="description">
+      <span class="drop-cap">U</span>nified customer view combining CRM, transactions,
+      support interactions, and behavioral data to provide a complete picture of each
+      customer. This flagship data product powers personalized marketing initiatives,
+      enhances customer service operations, and drives customer lifetime value optimization
+      across the organization.
+    </p>
+
+    <div class="columns">
+      <article class="article">
+        <h2 class="article-title">Output Ports</h2>
+
+        <div class="stat-card">
+          <div class="stat-number">1</div>
+          <div class="stat-label">Active Endpoint</div>
+        </div>
+
+        <div class="port-item">
+          <div class="port-name">Customer 360 REST API</div>
+          <span class="port-protocol">REST</span>
+          <p class="port-description">
+            RESTful API providing access to unified customer profiles with
+            comprehensive attribute coverage and real-time data freshness.
+          </p>
+          <div class="endpoint-box">
+            https://api.vcondition.com/v1/customers
+          </div>
+
+          <div class="dataset-section">
+            <div class="dataset-title">Serves Dataset</div>
+            <div class="dataset-name">Customer Master Dataset</div>
+            <span class="format-tag">JSON</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="article">
+        <h2 class="article-title">Input Ports</h2>
+
+        <div class="stat-card">
+          <div class="stat-number">0</div>
+          <div class="stat-label">Dependencies</div>
+        </div>
+
+        <div class="empty-state">
+          <div class="empty-icon">*</div>
+          <p class="empty-text">
+            This is a source data product with<br>no upstream dependencies.
+          </p>
+        </div>
+      </article>
+    </div>
+
+    <footer class="footer">
+      <span>DPROD Catalog (c) 2025</span>
+      <span>Customer Analytics Domain</span>
+      <span>Page 1 of 1</span>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+# Find data products by owner/team
+# Parameter: $OWNER_URI - the full URI of the owner agent
+#
+# Example usage:
+#   Replace $OWNER_URI with <https://data.vcondition.com/agents/customer-data-team>
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?product ?label ?description ?domain ?domainLabel ?status
+WHERE {
+  ?product a dprod:DataProduct ;
+           rdfs:label ?label ;
+           dprod:dataProductOwner $OWNER_URI ;
+           dprod:lifecycleStatus ?status .
+
+  OPTIONAL { ?product dct:description ?description }
+  OPTIONAL { ?product dprod:domain ?domain . ?domain rdfs:label ?domainLabel }
+}
+ORDER BY ?label

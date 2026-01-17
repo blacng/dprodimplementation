@@ -1,0 +1,40 @@
+# Valid data product with lineage relationships
+# Expected: SHACL validation PASSES
+
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+@base <https://data.vcondition.com/> .
+
+# Upstream product (source)
+<test/valid/upstream-product> a dprod:DataProduct ;
+    rdfs:label "Upstream Test Product" ;
+    dct:description "Source product that provides data to downstream" ;
+    dprod:dataProductOwner <test/agents/lineage-owner> ;
+    dprod:lifecycleStatus <https://ekgf.github.io/dprod/data/lifecycle-status/Consume> ;
+    dprod:outputPort <test/ports/shared-port> .
+
+# Downstream product (consumer)
+<test/valid/downstream-product> a dprod:DataProduct ;
+    rdfs:label "Downstream Test Product" ;
+    dct:description "Consumer product that receives data from upstream" ;
+    dprod:dataProductOwner <test/agents/lineage-owner> ;
+    dprod:lifecycleStatus <https://ekgf.github.io/dprod/data/lifecycle-status/Build> ;
+    dprod:inputPort <test/ports/shared-port> ;
+    dprod:outputPort <test/ports/downstream-output> .
+
+# Shared port creating lineage relationship
+<test/ports/shared-port> a dprod:OutputPort, dprod:InputPort ;
+    rdfs:label "Shared Data Port" ;
+    dct:description "Port shared between upstream and downstream products" .
+
+<test/ports/downstream-output> a dprod:OutputPort ;
+    rdfs:label "Downstream Output" .
+
+# Owner
+<test/agents/lineage-owner> a foaf:Agent ;
+    foaf:name "Lineage Test Team" .

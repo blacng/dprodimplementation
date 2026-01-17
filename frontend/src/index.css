@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+/* Custom scrollbar - dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* React Flow styles */
+.react-flow__node {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.react-flow__edge-path {
+  stroke: #94a3b8;
+  stroke-width: 2;
+}
+
+.react-flow__edge.animated path {
+  stroke-dasharray: 5;
+  animation: dashdraw 0.5s linear infinite;
+}
+
+@keyframes dashdraw {
+  from {
+    stroke-dashoffset: 10;
+  }
+}
+
+/* Lineage DAG visualization styles */
+.lineage-particle {
+  filter: url(#glow);
+  opacity: 0.9;
+}
+
+@keyframes particle-pulse {
+  0%, 100% {
+    opacity: 0.9;
+    r: 4;
+  }
+  50% {
+    opacity: 0.6;
+    r: 5;
+  }
+}
+
+.lineage-particle {
+  animation: particle-pulse 1.5s ease-in-out infinite;
+}
+
+/* Domain group fade-in */
+@keyframes domain-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.domain-group {
+  animation: domain-fade 0.5s ease-out forwards;
+}
+
+/* Lineage node hover effects */
+.react-flow__node-lineageNode {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.react-flow__node-lineageNode:hover {
+  z-index: 10;
+}

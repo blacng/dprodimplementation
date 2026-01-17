@@ -1,0 +1,22 @@
+# Invalid: Data product with wrong type for owner (literal instead of URI)
+# Expected: SHACL validation FAILS - dprod:dataProductOwner should be a resource
+
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+@base <https://data.vcondition.com/> .
+
+# INVALID: Owner is a literal string instead of a URI reference
+<test/invalid/wrong-type-owner> a dprod:DataProduct ;
+    rdfs:label "Product With Literal Owner" ;
+    dct:description "This product has an owner specified as a string literal" ;
+    # INVALID: Should be a URI, not a literal
+    dprod:dataProductOwner "John Smith" ;
+    dprod:lifecycleStatus <https://ekgf.github.io/dprod/data/lifecycle-status/Build> ;
+    dprod:outputPort <test/ports/literal-owner-output> .
+
+<test/ports/literal-owner-output> a dprod:OutputPort ;
+    rdfs:label "Literal Owner Output" .

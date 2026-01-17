@@ -1,0 +1,21 @@
+# Find datasets not linked to any data product
+# Admin query to identify orphaned data assets
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?dataset ?datasetLabel ?datasetDescription
+WHERE {
+  ?dataset a dcat:Dataset .
+
+  OPTIONAL { ?dataset rdfs:label ?datasetLabel }
+  OPTIONAL { ?dataset dct:description ?datasetDescription }
+
+  # Check that no output port references this dataset
+  FILTER NOT EXISTS {
+    ?port a dprod:OutputPort ;
+          dprod:datasetSource ?dataset .
+  }
+}
+ORDER BY ?datasetLabel

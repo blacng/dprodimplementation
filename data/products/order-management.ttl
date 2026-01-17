@@ -1,0 +1,100 @@
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@base <https://data.vcondition.com/> .
+
+# =============================================================================
+# Order Management Data Product - One-to-Many Example
+# Demonstrates: 1 Data Product -> 3 distinct Datasets
+# =============================================================================
+
+<products/order-management> a dprod:DataProduct ;
+    rdfs:label "Order Management" ;
+    dct:title "Order Management Data Product" ;
+    dct:description "Comprehensive order data spanning real-time events, historical records, and aggregated analytics for order lifecycle management" ;
+    dprod:dataProductOwner <agents/order-management-team> ;
+    dprod:domain <domains/operations> ;
+    dprod:lifecycleStatus <https://ekgf.github.io/dprod/data/lifecycle-status/Consume> ;
+    dprod:purpose "Enable real-time order tracking, historical analysis, and operational reporting" ;
+    # One-to-Many: Three output ports serving three distinct datasets
+    dprod:outputPort <services/order-events-api> ;
+    dprod:outputPort <services/order-analytics-api> ;
+    dprod:outputPort <services/order-history-api> ;
+    dprod:inputPort <services/customer-360-api> ;
+    dct:created "2024-02-01"^^xsd:date ;
+    dct:modified "2024-12-20"^^xsd:date .
+
+# =============================================================================
+# Output Port 1: Order Events (Real-time event stream)
+# =============================================================================
+
+<services/order-events-api> a dcat:DataService ;
+    rdfs:label "Order Events Stream API" ;
+    dct:description "Real-time streaming API for order lifecycle events (created, updated, shipped, delivered, cancelled)" ;
+    dcat:endpointURL <https://api.vcondition.com/v1/orders/events> ;
+    dprod:protocol <protocols/websocket> ;
+    dcat:servesDataset <datasets/order-events> .
+
+<datasets/order-events> a dcat:Dataset ;
+    rdfs:label "Order Events Dataset" ;
+    dct:title "Order Events Dataset" ;
+    dct:description "Real-time stream of order lifecycle events including status changes, updates, and notifications" ;
+    dcat:distribution <distributions/order-events-json> .
+
+<distributions/order-events-json> a dcat:Distribution ;
+    rdfs:label "Order Events - JSON Stream" ;
+    dct:format <https://www.iana.org/assignments/media-types/application/json> ;
+    dcat:mediaType "application/json" .
+
+# =============================================================================
+# Output Port 2: Order Analytics (Aggregated metrics)
+# =============================================================================
+
+<services/order-analytics-api> a dcat:DataService ;
+    rdfs:label "Order Analytics API" ;
+    dct:description "REST API providing aggregated order metrics including daily volumes, average order values, and fulfillment rates" ;
+    dcat:endpointURL <https://api.vcondition.com/v1/orders/analytics> ;
+    dprod:protocol <protocols/rest> ;
+    dcat:servesDataset <datasets/order-aggregates> .
+
+<datasets/order-aggregates> a dcat:Dataset ;
+    rdfs:label "Order Aggregates Dataset" ;
+    dct:title "Order Aggregates Dataset" ;
+    dct:description "Pre-computed order metrics aggregated by day, week, month including volumes, values, and performance KPIs" ;
+    dcat:distribution <distributions/order-aggregates-json> ;
+    dcat:distribution <distributions/order-aggregates-parquet> .
+
+<distributions/order-aggregates-json> a dcat:Distribution ;
+    rdfs:label "Order Aggregates - JSON" ;
+    dct:format <https://www.iana.org/assignments/media-types/application/json> ;
+    dcat:mediaType "application/json" .
+
+<distributions/order-aggregates-parquet> a dcat:Distribution ;
+    rdfs:label "Order Aggregates - Parquet" ;
+    dct:format <https://www.iana.org/assignments/media-types/application/vnd.apache.parquet> ;
+    dcat:mediaType "application/vnd.apache.parquet" .
+
+# =============================================================================
+# Output Port 3: Order History (Historical records)
+# =============================================================================
+
+<services/order-history-api> a dcat:DataService ;
+    rdfs:label "Order History API" ;
+    dct:description "REST API for querying historical order records with full order details and audit trail" ;
+    dcat:endpointURL <https://api.vcondition.com/v1/orders/history> ;
+    dprod:protocol <protocols/rest> ;
+    dcat:servesDataset <datasets/order-history> .
+
+<datasets/order-history> a dcat:Dataset ;
+    rdfs:label "Order History Dataset" ;
+    dct:title "Order History Dataset" ;
+    dct:description "Complete historical record of all orders including line items, shipping details, and status history" ;
+    dcat:distribution <distributions/order-history-json> .
+
+<distributions/order-history-json> a dcat:Distribution ;
+    rdfs:label "Order History - JSON" ;
+    dct:format <https://www.iana.org/assignments/media-types/application/json> ;
+    dcat:mediaType "application/json" .

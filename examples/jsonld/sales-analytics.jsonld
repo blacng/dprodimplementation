@@ -1,0 +1,44 @@
+{
+  "@context": "./dprod-context.jsonld",
+  "@graph": [
+    {
+      "@id": "https://data.vcondition.com/products/sales-analytics",
+      "@type": "DataProduct",
+      "label": "Sales Analytics",
+      "title": "Sales Analytics Data Product",
+      "description": "Comprehensive sales performance analytics including pipeline metrics, conversion rates, and revenue forecasting",
+      "dataProductOwner": "https://data.vcondition.com/agents/sales-team",
+      "domain": "https://data.vcondition.com/domains/sales-operations",
+      "lifecycleStatus": "https://ekgf.github.io/dprod/data/lifecycle-status/Build",
+      "purpose": "Enable data-driven sales decisions, forecast revenue, and optimize sales processes",
+      "outputPort": "https://data.vcondition.com/services/sales-analytics-api",
+      "inputPort": "https://data.vcondition.com/services/customer-360-api",
+      "created": "2024-06-01",
+      "modified": "2024-11-15"
+    },
+    {
+      "@id": "https://data.vcondition.com/services/sales-analytics-api",
+      "@type": "DataService",
+      "label": "Sales Analytics API",
+      "description": "GraphQL API for sales metrics and forecasting",
+      "endpointURL": "https://api.vcondition.com/v1/sales",
+      "protocol": "https://data.vcondition.com/protocols/graphql",
+      "servesDataset": "https://data.vcondition.com/datasets/sales-metrics"
+    },
+    {
+      "@id": "https://data.vcondition.com/datasets/sales-metrics",
+      "@type": "Dataset",
+      "label": "Sales Metrics Dataset",
+      "title": "Sales Metrics Dataset",
+      "description": "Aggregated sales metrics including pipeline, conversions, and revenue data",
+      "distribution": "https://data.vcondition.com/distributions/sales-metrics-json"
+    },
+    {
+      "@id": "https://data.vcondition.com/distributions/sales-metrics-json",
+      "@type": "Distribution",
+      "label": "Sales Metrics - JSON",
+      "format": "https://www.iana.org/assignments/media-types/application/json",
+      "mediaType": "application/json"
+    }
+  ]
+}

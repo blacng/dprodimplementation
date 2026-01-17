@@ -1,0 +1,70 @@
+# Validate a data product against required constraints
+# Returns violations for any missing required properties
+# This query performs validation without requiring built-in SHACL support
+#
+# Note: When validating test files, data is loaded to urn:test:validation graph
+# This query validates data in that graph
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?product ?violation ?message
+WHERE {
+  GRAPH <urn:test:validation> {
+    ?product a dprod:DataProduct .
+  }
+
+  {
+    # Check for missing rdfs:label
+    FILTER NOT EXISTS { GRAPH <urn:test:validation> { ?product rdfs:label ?label } }
+    BIND("missing-label" AS ?violation)
+    BIND("Data product must have rdfs:label" AS ?message)
+  }
+  UNION
+  {
+    # Check for missing dct:description
+    FILTER NOT EXISTS { GRAPH <urn:test:validation> { ?product dct:description ?desc } }
+    BIND("missing-description" AS ?violation)
+    BIND("Data product must have dct:description" AS ?message)
+  }
+  UNION
+  {
+    # Check for missing dprod:dataProductOwner
+    FILTER NOT EXISTS { GRAPH <urn:test:validation> { ?product dprod:dataProductOwner ?owner } }
+    BIND("missing-owner" AS ?violation)
+    BIND("Data product must have dprod:dataProductOwner" AS ?message)
+  }
+  UNION
+  {
+    # Check for literal owner (should be IRI)
+    GRAPH <urn:test:validation> { ?product dprod:dataProductOwner ?owner }
+    FILTER(isLiteral(?owner))
+    BIND("invalid-owner-type" AS ?violation)
+    BIND("dprod:dataProductOwner must be an IRI, not a literal" AS ?message)
+  }
+  UNION
+  {
+    # Check for missing dprod:lifecycleStatus
+    FILTER NOT EXISTS { GRAPH <urn:test:validation> { ?product dprod:lifecycleStatus ?status } }
+    BIND("missing-lifecycle-status" AS ?violation)
+    BIND("Data product must have dprod:lifecycleStatus" AS ?message)
+  }
+  UNION
+  {
+    # Check for missing dprod:outputPort
+    FILTER NOT EXISTS { GRAPH <urn:test:validation> { ?product dprod:outputPort ?port } }
+    BIND("missing-output-port" AS ?violation)
+    BIND("Data product must have at least one dprod:outputPort" AS ?message)
+  }
+  UNION
+  {
+    # Check for literal outputPort (should be IRI)
+    GRAPH <urn:test:validation> { ?product dprod:outputPort ?port }
+    FILTER(isLiteral(?port))
+    BIND("invalid-port-type" AS ?violation)
+    BIND("dprod:outputPort must be an IRI, not a literal" AS ?message)
+  }
+}
+ORDER BY ?product ?violation

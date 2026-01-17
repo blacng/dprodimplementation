@@ -1,0 +1,43 @@
+# Count validation violations for test data
+# Returns count of constraint violations found
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT (COUNT(*) as ?violations)
+WHERE {
+  GRAPH <urn:test:validation> {
+    ?product a dprod:DataProduct .
+  }
+
+  {
+    FILTER NOT EXISTS { GRAPH <urn:test:validation> { ?product rdfs:label ?l } }
+  }
+  UNION
+  {
+    FILTER NOT EXISTS { GRAPH <urn:test:validation> { ?product dct:description ?d } }
+  }
+  UNION
+  {
+    FILTER NOT EXISTS { GRAPH <urn:test:validation> { ?product dprod:dataProductOwner ?o } }
+  }
+  UNION
+  {
+    GRAPH <urn:test:validation> { ?product dprod:dataProductOwner ?o }
+    FILTER(isLiteral(?o))
+  }
+  UNION
+  {
+    FILTER NOT EXISTS { GRAPH <urn:test:validation> { ?product dprod:lifecycleStatus ?s } }
+  }
+  UNION
+  {
+    FILTER NOT EXISTS { GRAPH <urn:test:validation> { ?product dprod:outputPort ?p } }
+  }
+  UNION
+  {
+    GRAPH <urn:test:validation> { ?product dprod:outputPort ?p }
+    FILTER(isLiteral(?p))
+  }
+}

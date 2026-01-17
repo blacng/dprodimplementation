@@ -1,0 +1,29 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@base <https://data.vcondition.com/> .
+
+# Business Domain Taxonomy
+<domains/customer-analytics> a skos:Concept ;
+    rdfs:label "Customer Analytics" ;
+    skos:prefLabel "Customer Analytics" ;
+    skos:definition "Domain focused on customer data, behavior analysis, and customer experience optimization" .
+
+<domains/sales-operations> a skos:Concept ;
+    rdfs:label "Sales Operations" ;
+    skos:prefLabel "Sales Operations" ;
+    skos:definition "Domain covering sales performance, pipeline management, and revenue analytics" .
+
+<domains/human-resources> a skos:Concept ;
+    rdfs:label "Human Resources" ;
+    skos:prefLabel "Human Resources" ;
+    skos:definition "Domain for workforce management, employee analytics, and talent operations" .
+
+<domains/finance> a skos:Concept ;
+    rdfs:label "Finance" ;
+    skos:prefLabel "Finance" ;
+    skos:definition "Domain for financial reporting, accounting, and fiscal analytics" .
+
+<domains/marketing> a skos:Concept ;
+    rdfs:label "Marketing" ;
+    skos:prefLabel "Marketing" ;
+    skos:definition "Domain for marketing campaigns, lead generation, and brand analytics" .

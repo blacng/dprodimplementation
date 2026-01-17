@@ -1,0 +1,25 @@
+# Invalid: Data product missing required lifecycle status
+# Expected: SHACL validation FAILS - dprod:lifecycleStatus is required
+
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+@base <https://data.vcondition.com/> .
+
+# INVALID: Missing dprod:lifecycleStatus
+<test/invalid/missing-lifecycle-status> a dprod:DataProduct ;
+    rdfs:label "Product Without Lifecycle Status" ;
+    dct:description "This product is missing the required lifecycle status" ;
+    dprod:dataProductOwner <test/agents/status-test-owner> ;
+    # dprod:lifecycleStatus is MISSING - should fail validation
+    dprod:outputPort <test/ports/statusless-output> .
+
+<test/agents/status-test-owner> a foaf:Agent ;
+    foaf:name "Status Test Owner" .
+
+<test/ports/statusless-output> a dprod:OutputPort ;
+    rdfs:label "Statusless Output Port" .

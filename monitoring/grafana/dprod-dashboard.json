@@ -1,0 +1,163 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "dprod-catalog",
+    "title": "DPROD Catalog",
+    "tags": ["graphdb", "dprod"],
+    "timezone": "browser",
+    "schemaVersion": 30,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "GraphDB Status",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "up{job=\"graphdb\"}",
+            "legendFormat": "Status"
+          }
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "center"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" } } },
+              { "type": "value", "options": { "1": { "text": "UP", "color": "green" } } }
+            ]
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Repository Statements",
+        "type": "stat",
+        "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "graphdb_repository_statements_total{repository=\"dprod-catalog\"}",
+            "legendFormat": "Statements"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "id": 3,
+        "title": "Heap Usage",
+        "type": "gauge",
+        "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "graphdb_heap_used_bytes / graphdb_heap_max_bytes * 100",
+            "legendFormat": "Heap %"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 70, "color": "yellow" },
+                { "value": 90, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Active Queries",
+        "type": "stat",
+        "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "graphdb_active_queries",
+            "legendFormat": "Active"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Query Rate",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(graphdb_queries_total[5m])",
+            "legendFormat": "Queries/sec"
+          }
+        ],
+        "yAxes": [
+          { "label": "Queries/sec", "min": 0 }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Query Latency (p95)",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(graphdb_queries_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95 Latency"
+          }
+        ],
+        "yAxes": [
+          { "label": "Seconds", "min": 0 }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 12, "w": 12, "h": 6 },
+        "targets": [
+          {
+            "expr": "rate(graphdb_queries_errors_total[5m])",
+            "legendFormat": "Errors/sec"
+          }
+        ],
+        "yAxes": [
+          { "label": "Errors/sec", "min": 0 }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Memory Usage",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 12, "w": 12, "h": 6 },
+        "targets": [
+          {
+            "expr": "graphdb_heap_used_bytes",
+            "legendFormat": "Used"
+          },
+          {
+            "expr": "graphdb_heap_max_bytes",
+            "legendFormat": "Max"
+          }
+        ],
+        "yAxes": [
+          { "label": "Bytes", "min": 0, "format": "bytes" }
+        ]
+      }
+    ]
+  },
+  "overwrite": true
+}

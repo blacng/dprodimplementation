@@ -1,0 +1,56 @@
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@base <https://data.vcondition.com/> .
+
+# Finance Reporting Data Product
+<products/finance-reporting> a dprod:DataProduct ;
+    rdfs:label "Finance Reporting" ;
+    dct:title "Finance Reporting Data Product" ;
+    dct:description "Financial reporting and analytics covering P&L, balance sheet, cash flow, and budget variance" ;
+    dprod:dataProductOwner <agents/finance-team> ;
+    dprod:domain <domains/finance> ;
+    dprod:lifecycleStatus <https://ekgf.github.io/dprod/data/lifecycle-status/Consume> ;
+    dprod:purpose "Enable financial reporting, budget tracking, and fiscal compliance" ;
+    dprod:outputPort <services/finance-reporting-api> ;
+    dprod:outputPort <services/finance-reporting-jdbc> ;
+    dct:created "2024-01-01"^^xsd:date ;
+    dct:modified "2024-12-15"^^xsd:date .
+
+# Output Port - REST API
+<services/finance-reporting-api> a dcat:DataService ;
+    rdfs:label "Finance Reporting API" ;
+    dct:description "REST API for financial reports and metrics" ;
+    dcat:endpointURL <https://api.vcondition.com/v1/finance> ;
+    dprod:protocol <protocols/rest> ;
+    dcat:servesDataset <datasets/financial-statements> .
+
+# Output Port - JDBC (for BI tools)
+<services/finance-reporting-jdbc> a dcat:DataService ;
+    rdfs:label "Finance Reporting JDBC" ;
+    dct:description "JDBC endpoint for direct SQL access by BI tools" ;
+    dcat:endpointURL <jdbc:postgresql://db.vcondition.com:5432/finance> ;
+    dprod:protocol <protocols/jdbc> ;
+    dcat:servesDataset <datasets/financial-statements> .
+
+# Dataset
+<datasets/financial-statements> a dcat:Dataset ;
+    rdfs:label "Financial Statements Dataset" ;
+    dct:title "Financial Statements Dataset" ;
+    dct:description "Consolidated financial statements and fiscal metrics" ;
+    dcat:distribution <distributions/financial-statements-json> ;
+    dcat:distribution <distributions/financial-statements-parquet> .
+
+# Distributions
+<distributions/financial-statements-json> a dcat:Distribution ;
+    rdfs:label "Financial Statements - JSON" ;
+    dct:format <https://www.iana.org/assignments/media-types/application/json> ;
+    dcat:mediaType "application/json" .
+
+<distributions/financial-statements-parquet> a dcat:Distribution ;
+    rdfs:label "Financial Statements - Parquet" ;
+    dct:format <https://www.iana.org/assignments/media-types/application/vnd.apache.parquet> ;
+    dcat:mediaType "application/vnd.apache.parquet" .

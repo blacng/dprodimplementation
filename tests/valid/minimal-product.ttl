@@ -1,0 +1,27 @@
+# Minimal valid data product - contains only required properties
+# Expected: SHACL validation PASSES
+
+@prefix dprod: <https://ekgf.github.io/dprod/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+@base <https://data.vcondition.com/> .
+
+# Minimal valid data product
+<test/valid/minimal-product> a dprod:DataProduct ;
+    rdfs:label "Minimal Test Product" ;
+    dct:description "A minimal data product with only required fields" ;
+    dprod:dataProductOwner <test/agents/test-owner> ;
+    dprod:lifecycleStatus <https://ekgf.github.io/dprod/data/lifecycle-status/Build> ;
+    dprod:outputPort <test/ports/minimal-output> .
+
+# Required owner agent
+<test/agents/test-owner> a foaf:Agent ;
+    foaf:name "Test Owner" .
+
+# Required output port
+<test/ports/minimal-output> a dprod:OutputPort ;
+    rdfs:label "Minimal Output Port" .

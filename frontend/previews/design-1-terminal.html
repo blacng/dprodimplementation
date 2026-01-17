@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design 1: Terminal Command Center</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --phosphor: #00ff41;
+      --amber: #ffb000;
+      --dim: #00ff4140;
+    }
+
+    body {
+      font-family: 'IBM Plex Mono', monospace;
+      background: #000;
+      color: var(--phosphor);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* CRT Effects */
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.15) 0px,
+        rgba(0,0,0,0.15) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+    }
+
+    .crt-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, rgba(0,255,65,0.08) 0%, transparent 70%);
+      filter: blur(40px);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Header */
+    .header {
+      border: 1px solid var(--dim);
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .header::before {
+      content: '|';
+      display: block;
+      font-size: 0.6rem;
+      color: var(--dim);
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+    }
+
+    .header::after {
+      content: '|';
+      display: block;
+      font-size: 0.6rem;
+      color: var(--dim);
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+
+    .prompt {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .prompt-symbol { color: var(--phosphor); }
+    .cursor {
+      animation: blink 1s step-end infinite;
+      color: var(--phosphor);
+    }
+    .path {
+      color: var(--amber);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-size: 0.75rem;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border: 1px solid var(--phosphor);
+      margin-bottom: 1rem;
+      font-size: 0.75rem;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--phosphor);
+      border-radius: 50%;
+      animation: pulse 1.5s ease-in-out infinite;
+      box-shadow: 0 0 10px var(--phosphor);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Title */
+    .title {
+      font-size: 2rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 20px var(--dim);
+    }
+
+    /* Metadata block */
+    .metadata {
+      background: rgba(0,255,65,0.03);
+      border-left: 2px solid var(--phosphor);
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+    }
+
+    .metadata-row {
+      display: flex;
+      margin-bottom: 0.25rem;
+    }
+
+    .metadata-key {
+      width: 120px;
+      color: var(--dim);
+    }
+
+    .metadata-value {
+      color: var(--phosphor);
+    }
+
+    /* Section */
+    .section {
+      border: 1px solid var(--dim);
+      margin-bottom: 1.5rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--dim);
+      background: rgba(0,255,65,0.02);
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .section-count {
+      font-size: 0.75rem;
+      padding: 0.125rem 0.5rem;
+      border: 1px solid var(--phosphor);
+    }
+
+    /* File tree */
+    .file-tree {
+      padding: 1rem;
+      font-size: 0.85rem;
+    }
+
+    .tree-item {
+      margin-left: 1rem;
+      position: relative;
+    }
+
+    .tree-item::before {
+      content: '|-- ';
+      color: var(--dim);
+    }
+
+    .tree-item:last-child::before {
+      content: '`-- ';
+    }
+
+    .tree-item.nested {
+      margin-left: 2rem;
+    }
+
+    .tree-item.nested::before {
+      content: '|   |-- ';
+    }
+
+    .tree-item.nested:last-child::before {
+      content: '|   `-- ';
+    }
+
+    .tree-folder { color: var(--amber); }
+    .tree-file { color: var(--phosphor); }
+    .tree-value { color: #888; }
+
+    /* Endpoint */
+    .endpoint {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: rgba(0,255,65,0.03);
+      border: 1px dashed var(--dim);
+      margin: 1rem;
+      font-size: 0.8rem;
+    }
+
+    .endpoint-url {
+      color: #00ffff;
+      word-break: break-all;
+    }
+
+    /* Footer */
+    .footer {
+      font-size: 0.7rem;
+      color: var(--dim);
+      text-align: center;
+      padding-top: 2rem;
+      border-top: 1px solid var(--dim);
+    }
+
+    /* Watermark */
+    .watermark {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      font-size: 8rem;
+      font-weight: 600;
+      color: rgba(0,255,65,0.02);
+      pointer-events: none;
+      letter-spacing: 0.5em;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+  <div class="crt-glow"></div>
+  <div class="watermark">CLASSIFIED</div>
+
+  <div class="container">
+    <div class="header">
+      <div class="prompt">
+        <span class="prompt-symbol">$</span>
+        <span class="cursor">_</span>
+        <span class="path">dprod://catalog/customer-360</span>
+      </div>
+    </div>
+
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      <span>[ACTIVE]</span>
+    </div>
+
+    <h1 class="title">> Customer 360</h1>
+
+    <div class="metadata">
+      <div class="metadata-row">
+        <span class="metadata-key">STATUS:</span>
+        <span class="metadata-value">[CONSUME]</span>
+      </div>
+      <div class="metadata-row">
+        <span class="metadata-key">OWNER:</span>
+        <span class="metadata-value">customer-data-team</span>
+      </div>
+      <div class="metadata-row">
+        <span class="metadata-key">DOMAIN:</span>
+        <span class="metadata-value">customer-analytics</span>
+      </div>
+      <div class="metadata-row">
+        <span class="metadata-key">CREATED:</span>
+        <span class="metadata-value">2024-01-15T00:00:00Z</span>
+      </div>
+      <div class="metadata-row">
+        <span class="metadata-key">MODIFIED:</span>
+        <span class="metadata-value">2024-12-01T00:00:00Z</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">// OUTPUT_PORTS</span>
+        <span class="section-count">1</span>
+      </div>
+      <div class="file-tree">
+        <div class="tree-item">
+          <span class="tree-folder">customer-360-api/</span>
+        </div>
+        <div class="tree-item nested">
+          <span class="tree-file">protocol:</span>
+          <span class="tree-value"> REST</span>
+        </div>
+        <div class="tree-item nested">
+          <span class="tree-file">description:</span>
+          <span class="tree-value"> RESTful API for customer profiles</span>
+        </div>
+        <div class="tree-item nested">
+          <span class="tree-folder">dataset/</span>
+        </div>
+        <div class="tree-item nested" style="margin-left: 3rem;">
+          <span class="tree-file">name:</span>
+          <span class="tree-value"> customer-master</span>
+        </div>
+        <div class="tree-item nested" style="margin-left: 3rem;">
+          <span class="tree-file">format:</span>
+          <span class="tree-value"> [JSON]</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span style="color: var(--dim)">&gt;</span>
+        <span class="endpoint-url">https://api.vcondition.com/v1/customers</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">// INPUT_PORTS</span>
+        <span class="section-count">0</span>
+      </div>
+      <div class="file-tree">
+        <div style="color: var(--dim); padding: 1rem; text-align: center;">
+          [NO DEPENDENCIES - SOURCE DATA PRODUCT]
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>DPROD CATALOG v1.0 | SESSION: 0x7F3A | UPTIME: 847d 12h 33m</span>
+    </div>
+  </div>
+</body>
+</html>

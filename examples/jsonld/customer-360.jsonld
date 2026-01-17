@@ -1,0 +1,44 @@
+{
+  "@context": "./dprod-context.jsonld",
+  "@graph": [
+    {
+      "@id": "https://data.vcondition.com/products/customer-360",
+      "@type": "DataProduct",
+      "label": "Customer 360",
+      "title": "Customer 360 Data Product",
+      "description": "Unified customer view combining CRM, transactions, support interactions, and behavioral data to provide a complete picture of each customer",
+      "dataProductOwner": "https://data.vcondition.com/agents/customer-data-team",
+      "domain": "https://data.vcondition.com/domains/customer-analytics",
+      "lifecycleStatus": "https://ekgf.github.io/dprod/data/lifecycle-status/Consume",
+      "purpose": "Enable personalized marketing, improve customer service, and optimize customer lifetime value",
+      "outputPort": "https://data.vcondition.com/services/customer-360-api",
+      "created": "2024-01-15",
+      "modified": "2024-12-01"
+    },
+    {
+      "@id": "https://data.vcondition.com/services/customer-360-api",
+      "@type": "DataService",
+      "label": "Customer 360 REST API",
+      "description": "RESTful API providing access to unified customer profiles",
+      "endpointURL": "https://api.vcondition.com/v1/customers",
+      "endpointDescription": "https://api.vcondition.com/v1/customers/openapi.yaml",
+      "protocol": "https://data.vcondition.com/protocols/rest",
+      "servesDataset": "https://data.vcondition.com/datasets/customer-master"
+    },
+    {
+      "@id": "https://data.vcondition.com/datasets/customer-master",
+      "@type": "Dataset",
+      "label": "Customer Master Dataset",
+      "title": "Customer Master Dataset",
+      "description": "Golden record of all customers with unified attributes from multiple source systems",
+      "distribution": "https://data.vcondition.com/distributions/customer-master-json"
+    },
+    {
+      "@id": "https://data.vcondition.com/distributions/customer-master-json",
+      "@type": "Distribution",
+      "label": "Customer Master - JSON",
+      "format": "https://www.iana.org/assignments/media-types/application/json",
+      "mediaType": "application/json"
+    }
+  ]
+}

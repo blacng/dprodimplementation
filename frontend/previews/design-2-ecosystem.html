@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design 2: Living Ecosystem</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --sage: #7eb356;
+      --sage-light: #a8c686;
+      --earth: #8b6f47;
+      --cream: #faf8f5;
+      --cream-dark: #f0ebe3;
+      --forest: #2d3b2a;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, var(--cream) 0%, var(--cream-dark) 50%, #e8e0d5 100%);
+      color: var(--forest);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Floating blobs */
+    .blob {
+      position: fixed;
+      filter: blur(60px);
+      opacity: 0.15;
+      animation: float 20s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .blob-1 {
+      top: 10%;
+      right: 10%;
+      width: 400px;
+      height: 400px;
+      background: linear-gradient(135deg, var(--sage-light), var(--sage));
+      border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%;
+    }
+
+    .blob-2 {
+      bottom: 20%;
+      left: 5%;
+      width: 300px;
+      height: 300px;
+      background: linear-gradient(135deg, #c4a77d, var(--earth));
+      border-radius: 60% 40% 30% 70% / 40% 60% 40% 60%;
+      animation-delay: -10s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(20px, -20px) rotate(5deg); }
+      66% { transform: translate(-10px, 10px) rotate(-3deg); }
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--earth);
+      margin-bottom: 2rem;
+      opacity: 0.7;
+    }
+
+    /* Header card */
+    .header-card {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(20px);
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(168, 198, 134, 0.3);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.06);
+      border-radius: 2rem 3rem 2.5rem 3.5rem;
+      animation: fadeUp 0.6s ease-out;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Status */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, rgba(126,179,86,0.15), rgba(168,198,134,0.1));
+      border-radius: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .status-icon {
+      font-size: 1.25rem;
+      animation: sway 3s ease-in-out infinite;
+    }
+
+    @keyframes sway {
+      0%, 100% { transform: rotate(-5deg); }
+      50% { transform: rotate(5deg); }
+    }
+
+    .status-text {
+      font-weight: 500;
+      color: var(--sage);
+    }
+
+    /* Title */
+    .title {
+      font-family: 'Fraunces', serif;
+      font-size: 2.75rem;
+      font-weight: 400;
+      color: var(--forest);
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+
+    /* Description */
+    .description {
+      color: #5a6b52;
+      line-height: 1.7;
+      font-size: 1.05rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Meta row */
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      font-size: 0.9rem;
+      color: var(--earth);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 2rem;
+      animation: fadeUp 0.6s ease-out;
+      animation-fill-mode: both;
+    }
+
+    .section:nth-child(2) { animation-delay: 0.1s; }
+    .section:nth-child(3) { animation-delay: 0.2s; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-icon {
+      font-size: 1.5rem;
+    }
+
+    .section-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--forest);
+    }
+
+    .section-count {
+      margin-left: auto;
+      background: rgba(126,179,86,0.15);
+      color: var(--sage);
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    /* Branch tree */
+    .branch-container {
+      position: relative;
+      padding-left: 2rem;
+    }
+
+    .branch-line {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 1rem;
+      width: 3px;
+      background: linear-gradient(180deg, var(--sage-light) 0%, var(--cream-dark) 100%);
+      border-radius: 3px;
+    }
+
+    /* Port card */
+    .port-card {
+      position: relative;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(168, 198, 134, 0.2);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-radius: 1.25rem 1.5rem 1.5rem 1.25rem;
+    }
+
+    .port-card::before {
+      content: '';
+      position: absolute;
+      left: -2rem;
+      top: 50%;
+      width: 2rem;
+      height: 3px;
+      background: var(--sage-light);
+    }
+
+    .leaf {
+      position: absolute;
+      left: -2.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.25rem;
+    }
+
+    .port-name {
+      font-family: 'Fraunces', serif;
+      font-size: 1.1rem;
+      color: var(--forest);
+      margin-bottom: 0.5rem;
+    }
+
+    .port-protocol {
+      display: inline-block;
+      background: rgba(126,179,86,0.1);
+      color: var(--sage);
+      padding: 0.2rem 0.6rem;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+    }
+
+    .port-description {
+      color: #6b7c62;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+
+    .endpoint {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: rgba(126,179,86,0.05);
+      border-radius: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--sage);
+      word-break: break-all;
+    }
+
+    /* Dataset */
+    .dataset {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(168, 198, 134, 0.08);
+      border-radius: 1rem;
+    }
+
+    .dataset-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .dataset-name {
+      font-weight: 500;
+      color: var(--forest);
+    }
+
+    .format-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.5rem;
+      background: white;
+      border: 1px solid var(--sage-light);
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--sage);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--earth);
+      opacity: 0.7;
+    }
+
+    .empty-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <div class="container">
+    <nav class="breadcrumb">
+      <span>Catalog</span>
+      <span>-></span>
+      <span>Customer 360</span>
+    </nav>
+
+    <div class="header-card">
+      <div class="status">
+        <span class="status-icon">*</span>
+        <span class="status-text">Flourishing</span>
+      </div>
+
+      <h1 class="title">Customer 360</h1>
+
+      <p class="description">
+        Unified customer view combining CRM, transactions, support interactions,
+        and behavioral data to provide a complete picture of each customer.
+      </p>
+
+      <div class="meta-row">
+        <div class="meta-item">
+          <span>@</span>
+          <span>Customer Data Team</span>
+        </div>
+        <div class="meta-item">
+          <span>#</span>
+          <span>Customer Analytics</span>
+        </div>
+        <div class="meta-item">
+          <span>~</span>
+          <span>Created Jan 2024</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">+</span>
+        <span class="section-title">Output Ports</span>
+        <span class="section-count">1 branch</span>
+      </div>
+
+      <div class="branch-container">
+        <div class="branch-line"></div>
+
+        <div class="port-card">
+          <span class="leaf">~</span>
+          <div class="port-name">Customer 360 REST API</div>
+          <span class="port-protocol">REST</span>
+          <p class="port-description">
+            RESTful API providing access to unified customer profiles
+          </p>
+          <div class="endpoint">
+            <span>-></span>
+            <span>https://api.vcondition.com/v1/customers</span>
+          </div>
+
+          <div class="dataset">
+            <div class="dataset-header">
+              <span>[]</span>
+              <span class="dataset-name">Customer Master Dataset</span>
+            </div>
+            <div style="margin-top: 0.5rem;">
+              <span class="format-badge">
+                <span>.</span>
+                JSON
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">o</span>
+        <span class="section-title">Input Ports</span>
+        <span class="section-count">0 roots</span>
+      </div>
+
+      <div class="empty-state">
+        <div class="empty-icon">.</div>
+        <p>This is a seed product - no upstream dependencies</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

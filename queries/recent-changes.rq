@@ -1,0 +1,17 @@
+# Find recently modified data products
+# Returns products ordered by modification date (most recent first)
+
+PREFIX dprod: <https://ekgf.github.io/dprod/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?product ?label ?status ?modified ?created
+WHERE {
+  ?product a dprod:DataProduct ;
+           rdfs:label ?label ;
+           dprod:lifecycleStatus ?status .
+
+  OPTIONAL { ?product dct:modified ?modified }
+  OPTIONAL { ?product dct:created ?created }
+}
+ORDER BY DESC(?modified) DESC(?created)

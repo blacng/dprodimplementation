@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design 4: Refined Dark Theme</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --bg-elevated: #334155;
+      --border: #334155;
+      --border-subtle: #1e293b;
+      --text: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --cyan: #22d3ee;
+      --cyan-dim: rgba(34, 211, 238, 0.15);
+      --emerald: #34d399;
+      --emerald-dim: rgba(52, 211, 153, 0.15);
+      --amber: #fbbf24;
+      --red: #f87171;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      color: var(--cyan);
+    }
+
+    .breadcrumb-separator {
+      color: var(--text-muted);
+    }
+
+    .breadcrumb-current {
+      color: var(--text-secondary);
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .header-content {
+      flex: 1;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.625rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+
+    .status-badge.consume {
+      background: var(--emerald-dim);
+      color: var(--emerald);
+    }
+
+    .status-badge.build {
+      background: var(--cyan-dim);
+      color: var(--cyan);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .title {
+      font-size: 1.875rem;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.5rem;
+    }
+
+    .description {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+      max-width: 600px;
+    }
+
+    /* Meta grid */
+    .meta-grid {
+      display: flex;
+      gap: 2rem;
+      margin-top: 1.25rem;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+    }
+
+    .meta-label {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .meta-value {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    /* Actions */
+    .header-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--cyan-dim);
+      color: var(--cyan);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: rgba(34, 211, 238, 0.25);
+      border-color: rgba(34, 211, 238, 0.5);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-elevated);
+      color: var(--text);
+    }
+
+    /* Sections */
+    .section {
+      margin-bottom: 1.5rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .section-count {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      background: var(--bg-card);
+      color: var(--text-muted);
+    }
+
+    /* Port cards */
+    .port-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .port-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+    }
+
+    .port-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .port-title-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .port-name {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .port-protocol {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      padding: 0.125rem 0.375rem;
+      border-radius: 0.25rem;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .port-description {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    /* Endpoint */
+    .endpoint {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 0.875rem;
+      background: var(--bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.375rem;
+      margin-bottom: 1rem;
+    }
+
+    .endpoint-label {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .endpoint-url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8125rem;
+      color: var(--cyan);
+      word-break: break-all;
+    }
+
+    .endpoint-copy {
+      margin-left: auto;
+      padding: 0.25rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .endpoint-copy:hover {
+      color: var(--text);
+    }
+
+    /* Dataset */
+    .dataset {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 1rem;
+    }
+
+    .dataset-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .dataset-label {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .dataset-name {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 0.25rem;
+    }
+
+    .dataset-description {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .distributions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .distribution-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.5rem;
+      background: var(--bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6875rem;
+      color: var(--text-secondary);
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      border: 1px dashed var(--border);
+      border-radius: 0.5rem;
+    }
+
+    .empty-title {
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .empty-description {
+      font-size: 0.8125rem;
+    }
+
+    /* Two column for output/input */
+    .ports-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .ports-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Icon placeholder */
+    .icon {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a href="#">Catalog</a>
+      <span class="breadcrumb-separator">/</span>
+      <span class="breadcrumb-current">Customer 360</span>
+    </nav>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="status-row">
+          <span class="status-badge consume">
+            <span class="status-dot"></span>
+            Consume
+          </span>
+        </div>
+
+        <h1 class="title">Customer 360</h1>
+
+        <p class="description">
+          Unified customer view combining CRM, transactions, support interactions,
+          and behavioral data to provide a complete picture of each customer.
+        </p>
+
+        <div class="meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Owner</span>
+            <span class="meta-value">Customer Data Team</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Domain</span>
+            <span class="meta-value">Customer Analytics</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Created</span>
+            <span class="meta-value">Jan 15, 2024</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Modified</span>
+            <span class="meta-value">Dec 1, 2024</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-primary">
+          View Lineage
+        </button>
+        <button class="btn btn-secondary">
+          Copy URI
+        </button>
+      </div>
+    </header>
+
+    <!-- Ports Grid -->
+    <div class="ports-grid">
+      <!-- Output Ports -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">Output Ports</span>
+          <span class="section-count">1</span>
+        </div>
+
+        <div class="port-list">
+          <div class="port-card">
+            <div class="port-header">
+              <div class="port-title-row">
+                <span class="port-name">Customer 360 REST API</span>
+                <span class="port-protocol">REST</span>
+              </div>
+            </div>
+
+            <p class="port-description">
+              RESTful API providing access to unified customer profiles
+            </p>
+
+            <div class="endpoint">
+              <span class="endpoint-label">Endpoint</span>
+              <span class="endpoint-url">https://api.vcondition.com/v1/customers</span>
+              <button class="endpoint-copy" title="Copy URL">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
+
+            <div class="dataset">
+              <span class="dataset-label">Dataset</span>
+              <div class="dataset-name">Customer Master Dataset</div>
+              <p class="dataset-description">
+                Golden record of all customers with unified attributes
+              </p>
+              <div class="distributions">
+                <span class="distribution-badge">JSON</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Ports -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">Input Ports</span>
+          <span class="section-count">0</span>
+        </div>
+
+        <div class="empty-state">
+          <div class="empty-title">No dependencies</div>
+          <p class="empty-description">This is a source data product</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
