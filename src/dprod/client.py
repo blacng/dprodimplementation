@@ -1,5 +1,6 @@
 """DPROD Client for GraphDB SPARQL endpoint."""
 
+import os
 from datetime import date
 
 import requests
@@ -46,19 +47,19 @@ class DPRODClient:
 
     def __init__(
         self,
-        base_url: str = "http://localhost:7200",
-        repository: str = "dprod-catalog",
+        base_url: str | None = None,
+        repository: str | None = None,
         timeout: int = 30,
     ):
         """Initialize the DPROD client.
 
         Args:
-            base_url: GraphDB server URL
-            repository: Repository name
+            base_url: GraphDB server URL (defaults to GRAPHDB_URL env var or http://localhost:7200)
+            repository: Repository name (defaults to REPOSITORY_ID env var or dprod-catalog)
             timeout: Request timeout in seconds
         """
-        self.base_url = base_url.rstrip("/")
-        self.repository = repository
+        self.base_url = (base_url or os.getenv("GRAPHDB_URL", "http://localhost:7200")).rstrip("/")
+        self.repository = repository or os.getenv("REPOSITORY_ID", "dprod-catalog")
         self.timeout = timeout
         self._session = requests.Session()
 

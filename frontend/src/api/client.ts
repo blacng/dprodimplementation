@@ -10,7 +10,9 @@ import type {
   QualityReport,
 } from './types';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// In production, VITE_API_URL is empty to use relative URLs (proxied by nginx)
+// In development, falls back to http://localhost:8000
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 class APIError extends Error {
   status: number;

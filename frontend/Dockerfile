@@ -20,8 +20,9 @@ RUN npm ci --silent
 COPY . .
 
 # Build arguments for environment variables
-ARG VITE_API_URL=/api
-ENV VITE_API_URL=${VITE_API_URL}
+# Default empty for production (uses relative URLs), override for dev
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL:-}
 
 # Build production bundle
 RUN npm run build
