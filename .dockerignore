@@ -1,0 +1,64 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+.venv
+venv
+.pytest_cache
+.coverage
+htmlcov
+.tox
+.nox
+*.egg-info
+dist
+build
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Frontend (built separately)
+frontend/node_modules
+frontend/dist
+frontend/.next
+
+# Docker
+.docker
+*.log
+
+# Testing
+tests/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Claude
+.claude/
+
+# Temporary
+.cache
+tmp
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Monitoring (mounted as volumes)
+monitoring/grafana/data
+
+# Playwright
+.playwright-mcp

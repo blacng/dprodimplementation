@@ -1,0 +1,161 @@
+# DPROD Production Docker Compose
+# Usage: docker compose -f docker-compose.prod.yml up -d
+
+services:
+  # ===========================================
+  # Frontend - Nginx serving React static build
+  # ===========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: /api
+    container_name: dprod-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - dprod-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+
+  # ===========================================
+  # API - FastAPI with Uvicorn
+  # ===========================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dprod-api
+    environment:
+      - GRAPHDB_URL=http://graphdb:7200
+      - REPOSITORY_ID=${REPOSITORY_ID:-dprod-catalog}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    depends_on:
+      graphdb:
+        condition: service_healthy
+    networks:
+      - dprod-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+
+  # ===========================================
+  # GraphDB - RDF Triple Store
+  # ===========================================
+  graphdb:
+    image: ontotext/graphdb:10.8.0
+    container_name: dprod-graphdb
+    ports:
+      - "7200:7200"
+    volumes:
+      - graphdb-data:/opt/graphdb/home
+      - ./config:/opt/graphdb/config:ro
+    environment:
+      - GDB_HEAP_SIZE=${GRAPHDB_HEAP_SIZE:-4g}
+      - GDB_JAVA_OPTS=-Dgraphdb.home=/opt/graphdb/home -Dgraphdb.workbench.cors.enable=true -XX:+UseG1GC -XX:MaxGCPauseMillis=200
+    networks:
+      - dprod-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:7200/rest/repositories"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 6G
+        reservations:
+          cpus: "1"
+          memory: 4G
+
+  # ===========================================
+  # Prometheus - Metrics collection (optional)
+  # ===========================================
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: dprod-prometheus
+    profiles:
+      - monitoring
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+    ports:
+      - "9090:9090"
+    networks:
+      - dprod-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+  # ===========================================
+  # Grafana - Metrics visualization (optional)
+  # ===========================================
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: dprod-grafana
+    profiles:
+      - monitoring
+    volumes:
+      - ./monitoring/grafana:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - dprod-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+networks:
+  dprod-network:
+    driver: bridge
+
+volumes:
+  graphdb-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local

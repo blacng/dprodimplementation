@@ -1,0 +1,40 @@
+# Dependencies
+node_modules
+
+# Build output (we build fresh in Docker)
+dist
+.next
+.nuxt
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Testing
+coverage
+.nyc_output
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Previews (dev only)
+previews/
+
+# Documentation
+*.md

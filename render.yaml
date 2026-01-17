@@ -1,0 +1,32 @@
+# Render Blueprint - DPROD API
+# https://render.com/docs/blueprint-spec
+#
+# Deploy: Connect this repo to Render, it will auto-detect this file.
+# Set GRAPHDB_URL in Render dashboard to your Hetzner server IP.
+
+services:
+  - type: web
+    name: dprod-api
+    runtime: python
+    region: oregon  # or frankfurt for EU
+    plan: starter   # $7/mo - 512MB RAM, 0.5 CPU
+    buildCommand: |
+      pip install uv &&
+      uv sync --frozen --no-dev
+    startCommand: |
+      uv run uvicorn src.dprod.api.main:app \
+        --host 0.0.0.0 \
+        --port $PORT \
+        --workers 2 \
+        --proxy-headers
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13"
+      - key: GRAPHDB_URL
+        sync: false  # Set manually in dashboard
+      - key: REPOSITORY_ID
+        value: dprod-catalog
+      - key: LOG_LEVEL
+        value: info
+    autoDeploy: true  # Deploy on every push to main

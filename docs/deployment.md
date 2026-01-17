@@ -84,7 +84,224 @@ LOG_LEVEL=info
 
 ## Deployment Options
 
-### Option 1: Local Development
+### Option 1: Cloud Production (Vercel + Render + Hetzner)
+
+**Recommended for production deployments.**
+
+This stack separates concerns across specialized platforms:
+- **Vercel**: Frontend (React static site with global CDN)
+- **Render**: API (FastAPI with managed deployment)
+- **Hetzner**: GraphDB (cost-effective VPS for database)
+
+**Estimated Cost**: ~$13-33/month
+
+#### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Internet                                 │
+└─────────────────────────┬───────────────────────────────────────┘
+                          │
+          ┌───────────────┼───────────────┐
+          ▼               │               │
+┌─────────────────┐       │               │
+│     Vercel      │       │               │
+│   (Frontend)    │       │               │
+│   Global CDN    │       │               │
+└────────┬────────┘       │               │
+         │                │               │
+         │  API calls     │               │
+         └───────────────►▼               │
+                  ┌───────────────┐       │
+                  │    Render     │       │
+                  │    (API)      │       │
+                  │   US Region   │       │
+                  └───────┬───────┘       │
+                          │               │
+                          │ SPARQL        │
+                          ▼               │
+                  ┌───────────────┐       │
+                  │   Hetzner     │◄──────┘
+                  │  (GraphDB)    │  Direct access
+                  │  EU Region    │  (optional)
+                  └───────────────┘
+```
+
+#### Step 1: Deploy GraphDB on Hetzner
+
+1. **Create a Hetzner Cloud account** at [hetzner.com/cloud](https://www.hetzner.com/cloud)
+
+2. **Provision a server**:
+   - Plan: CX33 (4 vCPU, 8GB RAM, 80GB SSD) — €5.49/mo
+   - Location: Germany (Falkenstein) or Finland (Helsinki)
+   - Image: Ubuntu 24.04
+   - Enable backups (+20% cost)
+
+3. **SSH into server and run setup**:
+
+```bash
+# Update system
+apt update && apt upgrade -y
+
+# Install Docker
+curl -fsSL https://get.docker.com | sh
+systemctl enable docker
+
+# Create app directory
+mkdir -p /opt/dprod && cd /opt/dprod
+
+# Create docker-compose for GraphDB only
+cat > docker-compose.yml << 'EOF'
+services:
+  graphdb:
+    image: ontotext/graphdb:10.8.0
+    container_name: dprod-graphdb
+    ports:
+      - "7200:7200"
+    volumes:
+      - graphdb-data:/opt/graphdb/home
+    environment:
+      - GDB_HEAP_SIZE=4g
+      - GDB_JAVA_OPTS=-Dgraphdb.home=/opt/graphdb/home -Dgraphdb.workbench.cors.enable=true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7200/rest/repositories"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  graphdb-data:
+EOF
+
+# Start GraphDB
+docker compose up -d
+
+# Configure firewall (allow only your Render IP range + your IP)
+ufw allow ssh
+ufw allow from <YOUR_IP> to any port 7200
+ufw enable
+```
+
+4. **Create repository and load data**:
+
+```bash
+# Wait for GraphDB to start
+sleep 30
+
+# Create repository (upload config/dprod-repo-config.ttl first)
+curl -X POST "http://localhost:7200/rest/repositories" \
+  -H "Content-Type: multipart/form-data" \
+  -F "config=@dprod-repo-config.ttl"
+
+# Load ontologies and data (upload files first, or use curl from URLs)
+# See Makefile targets: load-ontologies, load-shapes, load-vocab, load-products
+```
+
+#### Step 2: Deploy API on Render
+
+1. **Create a Render account** at [render.com](https://render.com)
+
+2. **Create `render.yaml`** in project root:
+
+```yaml
+# render.yaml
+services:
+  - type: web
+    name: dprod-api
+    runtime: python
+    buildCommand: pip install uv && uv sync --frozen
+    startCommand: uv run uvicorn src.dprod.api.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GRAPHDB_URL
+        value: http://<HETZNER_IP>:7200
+      - key: REPOSITORY_ID
+        value: dprod-catalog
+      - key: PYTHON_VERSION
+        value: "3.13"
+    healthCheckPath: /api/v1/health
+    plan: starter  # $7/mo
+```
+
+3. **Connect GitHub repo** to Render:
+   - Go to Render Dashboard → New → Web Service
+   - Connect your GitHub repository
+   - Render will auto-detect `render.yaml`
+
+4. **Set environment variables** in Render dashboard:
+   - `GRAPHDB_URL`: `http://<your-hetzner-ip>:7200`
+   - `REPOSITORY_ID`: `dprod-catalog`
+
+5. **Update Hetzner firewall** to allow Render's IP ranges:
+   - See [Render outbound IPs](https://render.com/docs/static-outbound-ip-addresses)
+
+#### Step 3: Deploy Frontend on Vercel
+
+1. **Create a Vercel account** at [vercel.com](https://vercel.com)
+
+2. **Install Vercel CLI**:
+
+```bash
+npm i -g vercel
+```
+
+3. **Configure environment variable**:
+
+Create `.env.production` in `frontend/`:
+```bash
+VITE_API_URL=https://dprod-api.onrender.com
+```
+
+4. **Deploy**:
+
+```bash
+# From project root
+vercel
+
+# For production
+vercel --prod
+```
+
+5. **Set environment variables** in Vercel dashboard:
+   - `VITE_API_URL`: `https://dprod-api.onrender.com` (your Render URL)
+
+#### Step 4: Configure CORS
+
+Update `src/dprod/api/main.py` to allow your Vercel domain:
+
+```python
+origins = [
+    "http://localhost:5173",
+    "https://your-project.vercel.app",
+    "https://your-custom-domain.com",
+]
+```
+
+#### Verification
+
+```bash
+# Check GraphDB (from your machine)
+curl http://<HETZNER_IP>:7200/rest/repositories
+
+# Check API
+curl https://dprod-api.onrender.com/api/v1/health
+
+# Check Frontend
+curl https://your-project.vercel.app
+```
+
+#### Cost Summary
+
+| Service | Plan | Monthly Cost |
+|---------|------|--------------|
+| Hetzner CX33 | 4 vCPU, 8GB RAM | €5.49 (~$6) |
+| Render Starter | Web Service | $7 |
+| Vercel | Free or Pro | $0-20 |
+| **Total** | | **$13-33** |
+
+---
+
+### Option 2: Local Development
 
 Quick start for local development:
 

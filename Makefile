@@ -1,7 +1,7 @@
 # DPROD GraphDB Makefile
 # Usage: make [target]
 
-.PHONY: help up down logs create-repo load-ontologies load-shapes load-vocab load-products setup setup-full health clean shell wait query queries-list test test-valid test-invalid test-validate-file api frontend dev
+.PHONY: help up down logs create-repo load-ontologies load-shapes load-vocab load-products setup setup-full health clean shell wait query queries-list test test-valid test-invalid test-validate-file api frontend dev prod-build prod-up prod-down prod-logs prod-logs-api prod-health prod-setup prod-clean prod-monitoring
 
 # Load environment variables
 -include .env
@@ -413,3 +413,68 @@ dev: ## Start both API and frontend (requires tmux or run in separate terminals)
 	@echo "  make frontend # Terminal 2: React at http://localhost:5173"
 	@echo ""
 	@echo "Or run: make api & make frontend"
+
+# ============================================
+# Production Deployment
+# ============================================
+
+prod-build: ## Build production Docker images
+	@echo "$(GREEN)Building production images...$(NC)"
+	docker compose -f docker-compose.prod.yml build
+
+prod-up: ## Start production stack
+	@echo "$(GREEN)Starting production stack...$(NC)"
+	docker compose -f docker-compose.prod.yml up -d
+	@echo ""
+	@echo "$(GREEN)Production stack started!$(NC)"
+	@echo "  Frontend: http://localhost:80"
+	@echo "  GraphDB:  http://localhost:7200"
+
+prod-down: ## Stop production stack
+	@echo "$(YELLOW)Stopping production stack...$(NC)"
+	docker compose -f docker-compose.prod.yml down
+
+prod-logs: ## View production logs
+	docker compose -f docker-compose.prod.yml logs -f
+
+prod-logs-api: ## View API logs only
+	docker compose -f docker-compose.prod.yml logs -f api
+
+prod-health: ## Check production health
+	@echo "$(GREEN)Checking production health...$(NC)"
+	@echo ""
+	@echo -n "  Frontend:  "
+	@curl -sf http://localhost:80/health && echo "$(GREEN)OK$(NC)" || echo "$(RED)FAIL$(NC)"
+	@echo -n "  API:       "
+	@curl -sf http://localhost:80/api/v1/health > /dev/null && echo "$(GREEN)OK$(NC)" || echo "$(RED)FAIL$(NC)"
+	@echo -n "  GraphDB:   "
+	@curl -sf http://localhost:7200/rest/repositories > /dev/null && echo "$(GREEN)OK$(NC)" || echo "$(RED)FAIL$(NC)"
+
+prod-setup: prod-build prod-up ## Build and start production stack
+	@echo "$(YELLOW)Waiting for services to be ready...$(NC)"
+	@sleep 10
+	@$(MAKE) create-repo
+	@$(MAKE) load-ontologies
+	@$(MAKE) load-shapes
+	@$(MAKE) load-vocab
+	@$(MAKE) load-products
+	@echo ""
+	@echo "$(GREEN)============================================$(NC)"
+	@echo "$(GREEN)Production setup complete!$(NC)"
+	@echo "$(GREEN)============================================$(NC)"
+	@echo ""
+	@echo "  Frontend: http://localhost:80"
+	@echo "  GraphDB:  http://localhost:7200"
+
+prod-clean: prod-down ## Stop and remove production volumes
+	@echo "$(RED)Removing production volumes...$(NC)"
+	docker compose -f docker-compose.prod.yml down -v
+
+prod-monitoring: ## Start with monitoring (Prometheus + Grafana)
+	@echo "$(GREEN)Starting production stack with monitoring...$(NC)"
+	docker compose -f docker-compose.prod.yml --profile monitoring up -d
+	@echo ""
+	@echo "  Frontend:   http://localhost:80"
+	@echo "  GraphDB:    http://localhost:7200"
+	@echo "  Prometheus: http://localhost:9090"
+	@echo "  Grafana:    http://localhost:3000"
