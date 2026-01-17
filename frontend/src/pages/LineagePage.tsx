@@ -68,11 +68,25 @@ interface DomainGroup {
   color: string;
 }
 
+// Custom node data type for lineage nodes
+// Index signature required by ReactFlow's Node<T> constraint
+interface LineageNodeData extends Record<string, unknown> {
+  label: string;
+  status?: string;
+  domain?: string;
+  domainUri?: string;
+  isSource: boolean;
+  depth: number;
+}
+
+// Type alias for our custom node
+type LineageFlowNode = Node<LineageNodeData>;
+
 // DAG layout using dagre
 function getDAGLayout(
   lineageNodes: LineageNode[],
   lineageEdges: LineageEdge[]
-): { nodes: Node[]; edges: Edge[]; domainGroups: DomainGroup[] } {
+): { nodes: LineageFlowNode[]; edges: Edge[]; domainGroups: DomainGroup[] } {
   const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
   g.setGraph({
@@ -100,7 +114,7 @@ function getDAGLayout(
   dagre.layout(g);
 
   // Convert to React Flow format
-  const nodes: Node[] = lineageNodes.map((node) => {
+  const nodes: LineageFlowNode[] = lineageNodes.map((node) => {
     const nodeWithPosition = g.node(node.uri);
     return {
       id: node.uri,
@@ -132,7 +146,7 @@ function getDAGLayout(
   }));
 
   // Calculate domain groups
-  const domainMap = new Map<string, { label: string; nodes: Node[] }>();
+  const domainMap = new Map<string, { label: string; nodes: LineageFlowNode[] }>();
   nodes.forEach((node) => {
     const domainUri = node.data.domainUri || 'uncategorized';
     const domainLabel = node.data.domain || 'Uncategorized';
@@ -229,15 +243,6 @@ function AnimatedDataFlowEdge({
 }
 
 // Custom node with depth-based coloring
-interface LineageNodeData {
-  label: string;
-  status?: string;
-  domain?: string;
-  domainUri?: string;
-  isSource: boolean;
-  depth: number;
-}
-
 function LineageNodeComponent({ data }: { data: LineageNodeData }) {
   const colors = getDepthColors(data.depth);
 
