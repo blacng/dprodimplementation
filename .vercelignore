@@ -1,0 +1,34 @@
+# Python (not deploying API to Vercel)
+src/
+.venv/
+__pycache__/
+*.py
+*.pyc
+pyproject.toml
+uv.lock
+requirements.txt
+
+# Development
+.git/
+.pytest_cache/
+.ruff_cache/
+
+# GraphDB data
+data/
+ontologies/
+shapes/
+queries/
+config/
+
+# Tests
+tests/
+
+# Documentation
+.claude/
+*.md
+!README.md
+
+# Config files
+docker-compose.yml
+Makefile
+.env*

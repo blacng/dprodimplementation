@@ -1,0 +1,66 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+jobs:
+  deploy:
+    name: Deploy to GraphDB
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start GraphDB
+        run: |
+          docker compose up -d
+          echo "Waiting for GraphDB to start..."
+          for i in {1..30}; do
+            if curl -s http://localhost:7200/rest/repositories > /dev/null; then
+              echo "GraphDB is ready!"
+              break
+            fi
+            echo "Attempt $i/30..."
+            sleep 2
+          done
+
+      - name: Create repository
+        run: make create-repo
+
+      - name: Load ontologies
+        run: make load-ontologies
+
+      - name: Load SHACL shapes
+        run: make load-shapes
+
+      - name: Load vocabularies
+        run: make load-vocab
+
+      - name: Load data products
+        run: make load-products
+
+      - name: Health check
+        run: make health
+
+      - name: Show deployment summary
+        env:
+          DEPLOY_ENV: ${{ inputs.environment }}
+        run: |
+          echo "Deployment Summary"
+          echo "=================="
+          echo "Environment: $DEPLOY_ENV"
+          echo "Repository: dprod-catalog"
+          echo ""
+          echo "Loaded resources:"
+          curl -s "http://localhost:7200/repositories/dprod-catalog/size" | jq -r '.results.bindings[0].size.value // "N/A"' || echo "Unable to get size"
