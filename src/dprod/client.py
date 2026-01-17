@@ -1,7 +1,6 @@
 """DPROD Client for GraphDB SPARQL endpoint."""
 
 from datetime import date
-from urllib.parse import quote
 
 import requests
 
